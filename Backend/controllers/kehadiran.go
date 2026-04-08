@@ -110,6 +110,14 @@ func CatatAbsenManual(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(`{"message": "Absen manual berhasil dicatat oleh Guru!"}`))
 }
 
+// GetRiwayatAbsenSiswa godoc
+// @Summary Riwayat Absensi Siswa
+// @Description Menampilkan data historis absensi milik siswa yang sedang login
+// @Tags 2. Operasional Siswa
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {array} controllers.RiwayatAbsenSiswa "Daftar Riwayat"
+// @Router /siswa/riwayat [get]
 func GetRiwayatAbsenSiswa(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Hanya menerima method GET", http.StatusMethodNotAllowed)

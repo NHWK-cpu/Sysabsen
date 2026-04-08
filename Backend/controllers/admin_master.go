@@ -99,6 +99,15 @@ func RemoveSiswaFromKelas(w http.ResponseWriter, r *http.Request) {
 // FITUR MATA PELAJARAN (MAPEL)
 // ==========================================
 
+// CreateMapel godoc
+// @Summary Tambah Mata Pelajaran Baru
+// @Tags 5. Admin - Master Data
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body controllers.CreateMapelReq true "Nama Mapel"
+// @Success 200 {object} controllers.SuccessMessage "Mapel berhasil ditambahkan"
+// @Router /admin/mapel/create [post]
 func CreateMapel(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Gunakan method POST", http.StatusMethodNotAllowed)
@@ -167,6 +176,15 @@ func DeleteMapel(w http.ResponseWriter, r *http.Request) {
 // FITUR KELAS
 // ==========================================
 
+// CreateKelas godoc
+// @Summary Tambah Kelas Baru
+// @Tags 5. Admin - Master Data
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body controllers.CreateKelasReq true "Nama Kelas"
+// @Success 200 {object} controllers.SuccessMessage "Kelas berhasil ditambahkan"
+// @Router /admin/kelas/create [post]
 func CreateKelas(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Gunakan method POST", http.StatusMethodNotAllowed)
@@ -238,4 +256,112 @@ func DeleteKelas(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Write([]byte("Kelas berhasil dihapus"))
+}
+
+// GetDashboardStats godoc
+// @Summary Statistik Dashboard Admin
+// @Description Menampilkan jumlah total akun, akun aktif (90 hari), inaktif, dan antrean device
+// @Tags 4. Admin - Dashboard & Device
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} controllers.AdminStatsResponse "Data Statistik"
+// @Router /admin/dashboard/stats [get]
+// GetDashboardStats: API untuk Dashboard Admin (Sesuai Desain UI)
+func GetDashboardStats(w http.ResponseWriter, r *http.Request) {
+	var stats struct {
+		TotalUsers       int `json:"total_users"`
+		ActiveUsers      int `json:"active_users"`
+		InactiveUsers    int `json:"inactive_users"`
+		PendingApprovals int `json:"pending_approvals"`
+	}
+
+	// 1. Total Users (Semua akun selain admin)
+	_ = config.DB.QueryRow("SELECT COUNT(*) FROM users WHERE role != 'admin'").Scan(&stats.TotalUsers)
+
+	// 2. Active Users (Login dalam 90 hari terakhir)
+	_ = config.DB.QueryRow("SELECT COUNT(*) FROM users WHERE last_login >= DATE_SUB(NOW(), INTERVAL 90 DAY) AND role != 'admin'").Scan(&stats.ActiveUsers)
+
+	// 3. Inactive Users (Tidak login > 90 hari, atau belum pernah login sama sekali)
+	_ = config.DB.QueryRow("SELECT COUNT(*) FROM users WHERE (last_login < DATE_SUB(NOW(), INTERVAL 90 DAY) OR last_login IS NULL) AND role != 'admin'").Scan(&stats.InactiveUsers)
+
+	// 4. Pending Approvals (Antrean Perangkat dari Device Binding ERD kita)
+	_ = config.DB.QueryRow("SELECT COUNT(*) FROM user_devices WHERE status = 'pending'").Scan(&stats.PendingApprovals)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(stats)
+}
+
+// GetInactiveUsers: Mengambil user yang tidak login lebih dari 90 hari
+func GetInactiveUsers(w http.ResponseWriter, r *http.Request) {
+	// Menggunakan COALESCE untuk mengambil nama dari siswa atau guru
+	// Menggunakan IFNULL untuk menangani last_login yang masih kosong
+	query := `
+		SELECT u.id, 
+		       COALESCE(s.nama_lengkap, g.nama_lengkap, 'Belum Ada Nama') as nama_lengkap, 
+		       u.username, 
+		       u.role, 
+		       IFNULL(u.last_login, 'Belum Pernah') as last_login, 
+		       IF(u.last_login IS NULL, 0, DATEDIFF(NOW(), u.last_login)) as days_inactive
+		FROM users u
+		LEFT JOIN siswa s ON u.id = s.user_id
+		LEFT JOIN guru g ON u.id = g.user_id
+		WHERE (u.last_login < DATE_SUB(NOW(), INTERVAL 90 DAY) OR u.last_login IS NULL)
+		AND u.role != 'admin'`
+
+	rows, err := config.DB.Query(query)
+	if err != nil {
+		http.Error(w, "Gagal query data inaktif: "+err.Error(), 500)
+		return
+	}
+	defer rows.Close()
+
+	var list []models.UserDashboardRow
+	for rows.Next() {
+		var u models.UserDashboardRow
+		// Pastikan urutan Scan sesuai dengan urutan SELECT di atas
+		err := rows.Scan(&u.ID, &u.NamaLengkap, &u.Username, &u.Role, &u.LastLogin, &u.DaysInactive)
+		if err != nil {
+			continue
+		}
+		list = append(list, u)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(list)
+}
+
+// GetAllUsers: Mengambil semua user untuk tabel utama
+func GetAllUsers(w http.ResponseWriter, r *http.Request) {
+	query := `
+		SELECT u.id, 
+		       COALESCE(s.nama_lengkap, g.nama_lengkap, 'User Baru') as nama_lengkap, 
+		       u.username, 
+		       u.role, 
+		       IFNULL(u.last_login, '-') as last_login,
+		       IF(u.last_login >= DATE_SUB(NOW(), INTERVAL 90 DAY), 'Active', 'Inactive') as status
+		FROM users u
+		LEFT JOIN siswa s ON u.id = s.user_id
+		LEFT JOIN guru g ON u.id = g.user_id
+		WHERE u.role != 'admin'
+		ORDER BY u.last_login DESC`
+
+	rows, err := config.DB.Query(query)
+	if err != nil {
+		http.Error(w, "Gagal query semua user: "+err.Error(), 500)
+		return
+	}
+	defer rows.Close()
+
+	var list []models.UserDashboardRow
+	for rows.Next() {
+		var u models.UserDashboardRow
+		err := rows.Scan(&u.ID, &u.NamaLengkap, &u.Username, &u.Role, &u.LastLogin, &u.Status)
+		if err != nil {
+			continue
+		}
+		list = append(list, u)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(list)
 }

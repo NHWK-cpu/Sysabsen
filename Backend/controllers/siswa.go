@@ -68,6 +68,14 @@ func CreateSiswa(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(fmt.Sprintf(`{"message": "Siswa %s berhasil ditambahkan!"}`, req.NamaLengkap)))
 }
 
+// GetAllSiswa godoc
+// @Summary Tampilkan Semua Data Siswa
+// @Description Mengambil daftar seluruh data master siswa
+// @Tags 5. Admin - Master Data
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {array} controllers.SiswaData "Data Siswa"
+// @Router /admin/siswa/all [get]
 // Fitur READ
 func GetAllSiswa(w http.ResponseWriter, r *http.Request) {
 	// Pastikan hanya menerima request tipe GET

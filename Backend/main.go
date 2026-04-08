@@ -14,7 +14,22 @@ import (
 	"backend-absensi/helpers"
 
 	"golang.org/x/crypto/bcrypt"
+	httpSwagger "github.com/swaggo/http-swagger"
+	_ "backend-absensi/docs"
 )
+
+// @title API Sistem Absensi Tempat Les
+// @version 1.0
+// @description Ini adalah dokumentasi REST API untuk aplikasi absensi dengan fitur QR & Geofencing.
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name Hafizh
+// @contact.email hafizh@example.com
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description Masukkan token JWT dengan format: Bearer {token}
 
 func main() {
 	// 1. Muat konfigurasi .env paling pertama!
@@ -29,11 +44,15 @@ func main() {
 
 	// Rute Publik (Tanpa Satpam)
 	http.HandleFunc("/login", controllers.Login)
+    http.HandleFunc("/login/siswa", controllers.LoginSiswa)
 
 	// Rute VIP (Dijaga Satpam Middleware)
 	http.HandleFunc("/dashboard", middlewares.JWTMiddleware(controllers.DashboardAdmin))
-	
+    
 	// Rute Khusus Admin
+	http.HandleFunc("/admin/dashboard/stats", middlewares.JWTMiddleware(middlewares.AdminOnly(controllers.GetDashboardStats)))
+    http.HandleFunc("/admin/users/inactive", middlewares.JWTMiddleware(middlewares.AdminOnly(controllers.GetInactiveUsers)))
+    http.HandleFunc("/admin/users/all", middlewares.JWTMiddleware(middlewares.AdminOnly(controllers.GetAllUsers)))
 	http.HandleFunc("/admin/siswa", middlewares.JWTMiddleware(middlewares.AdminOnly(controllers.CreateSiswa)))
 	http.HandleFunc("/admin/siswa/all", middlewares.JWTMiddleware(middlewares.AdminOnly(controllers.GetAllSiswa))) 
 	http.HandleFunc("/admin/siswa/update", middlewares.JWTMiddleware(middlewares.AdminOnly(controllers.UpdateSiswa)))
@@ -52,20 +71,32 @@ func main() {
 	http.HandleFunc("/admin/siswa-kelas/assign", middlewares.JWTMiddleware(middlewares.AdminOnly(controllers.AssignSiswaToKelas)))
 	http.HandleFunc("/admin/siswa-kelas/update", middlewares.JWTMiddleware(middlewares.AdminOnly(controllers.UpdateSiswaKelas)))
     http.HandleFunc("/admin/siswa-kelas/remove", middlewares.JWTMiddleware(middlewares.AdminOnly(controllers.RemoveSiswaFromKelas)))
+	http.HandleFunc("/admin/device/pending", middlewares.JWTMiddleware(middlewares.AdminOnly(controllers.GetPendingDevices)))
+    http.HandleFunc("/admin/device/approve", middlewares.JWTMiddleware(middlewares.AdminOnly(controllers.ApproveDevice)))
+    http.HandleFunc("/admin/device/reject", middlewares.JWTMiddleware(middlewares.AdminOnly(controllers.RejectDevice)))
+	http.HandleFunc("/admin/siswa/reset-password", middlewares.JWTMiddleware(middlewares.AdminOnly(controllers.ResetPasswordSiswa)))
 
 
 	// Rute Operasional Siswa
 	// Perhatikan: Kita pakai satpam SiswaOnly di sini
 	http.HandleFunc("/siswa/absen", middlewares.JWTMiddleware(middlewares.SiswaOnly(controllers.CatatAbsen)))
 	http.HandleFunc("/siswa/riwayat", middlewares.JWTMiddleware(middlewares.SiswaOnly(controllers.GetRiwayatAbsenSiswa)))
+    http.HandleFunc("/siswa/absen/submit", middlewares.JWTMiddleware(controllers.SubmitAbsen))
 
 	// Rute Operasional Guru
+	http.HandleFunc("/guru/dashboard/stats", middlewares.JWTMiddleware(controllers.GetGuruStats))
 	http.HandleFunc("/guru/jadwal", middlewares.JWTMiddleware(middlewares.GuruOnly(controllers.GetJadwalGuru)))
 	http.HandleFunc("/guru/absen", middlewares.JWTMiddleware(middlewares.GuruOnly(controllers.CatatAbsenManual)))
 	http.HandleFunc("/guru/generate-qr", middlewares.JWTMiddleware(middlewares.GuruOnly(controllers.GenerateQRSesi)))
+    http.HandleFunc("/guru/dashboard/attendance-list", middlewares.JWTMiddleware(controllers.GetSesiSiswaStatus))
 	http.HandleFunc("/guru/export", middlewares.JWTMiddleware(middlewares.GuruOnly(controllers.ExportDataAbsensi)))
     http.HandleFunc("/guru/backup", middlewares.JWTMiddleware(middlewares.GuruOnly(controllers.BackupDatabase)))
 	http.HandleFunc("/guru/restore", middlewares.JWTMiddleware(middlewares.GuruOnly(controllers.RestoreDatabase)))
+    http.HandleFunc("/guru/forgot-password", controllers.RequestResetPassword)
+    http.HandleFunc("/guru/reset-password", controllers.ExecuteResetPassword)
+
+	// Rute Dokumentasi Swagger
+    http.HandleFunc("/swagger/", httpSwagger.WrapHandler)
 
 	// 4. Menyalakan Server
 	fmt.Println("Server berjalan di port 8080...")

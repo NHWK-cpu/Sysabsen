@@ -1,0 +1,602 @@
+definitions:
+  controllers.AbsenRequest:
+    properties:
+      latitude:
+        example: -7.250446
+        type: number
+      longitude:
+        example: 112.768846
+        type: number
+      qr_token:
+        example: eyJhbGciOiJIUzI1NiIs...
+        type: string
+      sesi_id:
+        example: 1
+        type: integer
+    type: object
+  controllers.AdminStatsResponse:
+    properties:
+      akun_aktif:
+        example: 142
+        type: integer
+      akun_inaktif:
+        example: 8
+        type: integer
+      pending_device:
+        example: 3
+        type: integer
+      total_akun:
+        example: 150
+        type: integer
+    type: object
+  controllers.CreateKelasReq:
+    properties:
+      nama_kelas:
+        example: XII RPL 1
+        type: string
+    type: object
+  controllers.CreateMapelReq:
+    properties:
+      nama_mapel:
+        example: Pemrograman Web & Perangkat Bergerak
+        type: string
+    type: object
+  controllers.DeviceActionReq:
+    properties:
+      device_id:
+        example: 1
+        type: integer
+    type: object
+  controllers.ErrorMessage:
+    properties:
+      error:
+        example: 'Terjadi kesalahan: data tidak valid'
+        type: string
+    type: object
+  controllers.GuruQRResponse:
+    properties:
+      message:
+        example: QR Code berhasil dibuat, berlaku 30 detik!
+        type: string
+      qr_token:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6...
+        type: string
+    type: object
+  controllers.GuruStatsResponse:
+    properties:
+      absent_today:
+        example: 2
+        type: integer
+      attendance_rate:
+        example: 93.33
+        type: number
+      present_today:
+        example: 28
+        type: integer
+      total_students:
+        example: 30
+        type: integer
+    type: object
+  controllers.JadwalGuru:
+    properties:
+      id:
+        example: 1
+        type: integer
+      kelas:
+        example: XII RPL 1
+        type: string
+      mata_pelajaran:
+        example: Pemrograman Web
+        type: string
+      waktu_mulai:
+        example: "08:00"
+        type: string
+      waktu_selesai:
+        example: "10:00"
+        type: string
+    type: object
+  controllers.LoginRequest:
+    properties:
+      password:
+        example: rahasia123
+        type: string
+      username:
+        example: admin_utama
+        type: string
+    type: object
+  controllers.LoginSiswaRequest:
+    properties:
+      device_token:
+        example: hp-hafizh-xyz-123
+        type: string
+      password:
+        example: password123
+        type: string
+      username:
+        example: siswa01
+        type: string
+    type: object
+  controllers.LoginSiswaResponse:
+    properties:
+      data:
+        properties:
+          role:
+            example: siswa
+            type: string
+          token:
+            example: eyJhbGciOiJIUzI1NiIsInR5cCI6Ikp...
+            type: string
+        type: object
+      message:
+        example: Login berhasil!
+        type: string
+      status:
+        example: success
+        type: string
+    type: object
+  controllers.ResetPassSiswaReq:
+    properties:
+      kata_kunci:
+        example: KucingKu
+        type: string
+      new_password:
+        example: SandiBaru123
+        type: string
+      nis:
+        example: "22010101"
+        type: string
+    type: object
+  controllers.ResetPasswordReq:
+    properties:
+      new_password:
+        example: PasswordBaru123!
+        type: string
+      token:
+        example: 817cdc18e67140e57f62dd6c80fd52529...
+        type: string
+    type: object
+  controllers.RiwayatAbsenSiswa:
+    properties:
+      mapel:
+        example: Matematika
+        type: string
+      status:
+        example: hadir
+        type: string
+      tanggal:
+        example: "2026-04-08"
+        type: string
+    type: object
+  controllers.SiswaData:
+    properties:
+      email:
+        example: hafizh@example.com
+        type: string
+      id:
+        example: 1
+        type: integer
+      nama_lengkap:
+        example: Hafizh Junior
+        type: string
+      nis:
+        example: "22010101"
+        type: string
+    type: object
+  controllers.StudentStatusList:
+    properties:
+      nama:
+        example: Hafizh Junior
+        type: string
+      nis:
+        example: "22010101"
+        type: string
+      status:
+        example: hadir
+        type: string
+      waktu_absen:
+        example: "2026-04-08 09:15:00"
+        type: string
+    type: object
+  controllers.SuccessMessage:
+    properties:
+      message:
+        example: Aksi berhasil dilakukan!
+        type: string
+    type: object
+info:
+  contact:
+    email: hafizh@example.com
+    name: Hafizh
+  description: Ini adalah dokumentasi REST API untuk aplikasi absensi dengan fitur
+    QR & Geofencing.
+  termsOfService: http://swagger.io/terms/
+  title: API Sistem Absensi Tempat Les
+  version: "1.0"
+paths:
+  /admin/dashboard/stats:
+    get:
+      description: Menampilkan jumlah total akun, akun aktif (90 hari), inaktif, dan
+        antrean device
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Data Statistik
+          schema:
+            $ref: '#/definitions/controllers.AdminStatsResponse'
+      security:
+      - BearerAuth: []
+      summary: Statistik Dashboard Admin
+      tags:
+      - 4. Admin - Dashboard & Device
+  /admin/device/reject:
+    post:
+      consumes:
+      - application/json
+      description: Menolak akses login dari HP yang tidak dikenal
+      parameters:
+      - description: ID Perangkat
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.DeviceActionReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Perangkat Ditolak
+          schema:
+            $ref: '#/definitions/controllers.SuccessMessage'
+      security:
+      - BearerAuth: []
+      summary: Tolak Perangkat Siswa
+      tags:
+      - 4. Admin - Dashboard & Device
+  /admin/kelas/create:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Nama Kelas
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.CreateKelasReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Kelas berhasil ditambahkan
+          schema:
+            $ref: '#/definitions/controllers.SuccessMessage'
+      security:
+      - BearerAuth: []
+      summary: Tambah Kelas Baru
+      tags:
+      - 5. Admin - Master Data
+  /admin/mapel/create:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Nama Mapel
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.CreateMapelReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Mapel berhasil ditambahkan
+          schema:
+            $ref: '#/definitions/controllers.SuccessMessage'
+      security:
+      - BearerAuth: []
+      summary: Tambah Mata Pelajaran Baru
+      tags:
+      - 5. Admin - Master Data
+  /admin/siswa/all:
+    get:
+      description: Mengambil daftar seluruh data master siswa
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Data Siswa
+          schema:
+            items:
+              $ref: '#/definitions/controllers.SiswaData'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Tampilkan Semua Data Siswa
+      tags:
+      - 5. Admin - Master Data
+  /admin/siswa/reset-password:
+    post:
+      consumes:
+      - application/json
+      description: Admin mereset password siswa dengan validasi Kata Kunci Rahasia
+      parameters:
+      - description: Data Reset
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.ResetPassSiswaReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Password berhasil direset
+          schema:
+            $ref: '#/definitions/controllers.SuccessMessage'
+      security:
+      - BearerAuth: []
+      summary: Reset Password Siswa (Lupa Password)
+      tags:
+      - 4. Admin - Device & Keamanan
+  /guru/backup:
+    get:
+      description: Melakukan dump SQL dan mengunggahnya otomatis ke folder Drive
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Backup Berhasil Diupload
+          schema:
+            $ref: '#/definitions/controllers.SuccessMessage'
+      security:
+      - BearerAuth: []
+      summary: Backup Database ke Google Drive
+      tags:
+      - 3. Operasional Guru
+  /guru/dashboard/attendance-list:
+    get:
+      description: Menampilkan daftar nama siswa dan status absensinya (Hadir/Belum)
+      parameters:
+      - description: ID Sesi Pembelajaran
+        in: query
+        name: sesi_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Daftar Kehadiran
+          schema:
+            items:
+              $ref: '#/definitions/controllers.StudentStatusList'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Detail Status Kehadiran Per Siswa
+      tags:
+      - 3. Operasional Guru
+  /guru/dashboard/stats:
+    get:
+      description: Menampilkan total murid terdaftar, hadir, dan rasio kehadiran
+      parameters:
+      - description: ID Sesi Pembelajaran
+        in: query
+        name: sesi_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Data Ditemukan
+          schema:
+            $ref: '#/definitions/controllers.GuruStatsResponse'
+      security:
+      - BearerAuth: []
+      summary: Ringkasan Statistik Kelas
+      tags:
+      - 3. Operasional Guru
+  /guru/export:
+    get:
+      description: Otomatis mengunduh file Excel laporan absensi dan mem-backup ke
+        G-Drive
+      produces:
+      - application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+      responses:
+        "200":
+          description: File Downloaded
+          schema:
+            type: file
+      security:
+      - BearerAuth: []
+      summary: Download Laporan Excel
+      tags:
+      - 3. Operasional Guru
+  /guru/generate-qr:
+    get:
+      description: Menghasilkan JWT token beralaku 30 detik untuk diubah jadi gambar
+        QR
+      parameters:
+      - description: ID Sesi Pembelajaran
+        in: query
+        name: sesi_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Sukses Membuat QR
+          schema:
+            $ref: '#/definitions/controllers.GuruQRResponse'
+      security:
+      - BearerAuth: []
+      summary: Tampilkan QR Code (Guru)
+      tags:
+      - 3. Operasional Guru
+  /guru/jadwal:
+    get:
+      description: Menampilkan sesi pembelajaran berdasarkan guru yang sedang login
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Daftar Jadwal
+          schema:
+            items:
+              $ref: '#/definitions/controllers.JadwalGuru'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Jadwal Mengajar Guru
+      tags:
+      - 3. Operasional Guru
+  /guru/reset-password:
+    post:
+      consumes:
+      - application/json
+      description: Mengganti kata sandi guru menggunakan token rahasia
+      parameters:
+      - description: Token dan Password Baru
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.ResetPasswordReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Password berhasil diubah
+          schema:
+            $ref: '#/definitions/controllers.SuccessMessage'
+      summary: Eksekusi Reset Password
+      tags:
+      - 1. Auth & Keamanan
+  /guru/restore:
+    post:
+      consumes:
+      - application/json
+      description: Mengunduh file SQL dari Drive menggunakan File ID dan menimpanya
+        ke database lokal
+      parameters:
+      - description: Google Drive File ID
+        in: query
+        name: file_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Database Berhasil Direstore
+          schema:
+            $ref: '#/definitions/controllers.SuccessMessage'
+      security:
+      - BearerAuth: []
+      summary: Restore Database dari Google Drive
+      tags:
+      - 3. Operasional Guru
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Autentikasi untuk Admin dan Guru mengembalikan token JWT
+      parameters:
+      - description: Kredensial Login
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Berhasil Login
+          schema:
+            $ref: '#/definitions/controllers.LoginSiswaResponse'
+      summary: Login Admin & Guru
+      tags:
+      - 1. Auth & Keamanan
+  /login/siswa:
+    post:
+      consumes:
+      - application/json
+      description: Autentikasi siswa dan mendaftarkan ID perangkat (Device Binding)
+      parameters:
+      - description: Payload Data Login
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.LoginSiswaRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Berhasil Login
+          schema:
+            $ref: '#/definitions/controllers.LoginSiswaResponse'
+        "401":
+          description: Kredensial Salah
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      summary: Login untuk Siswa
+      tags:
+      - 1. Auth & Keamanan
+  /siswa/absen/submit:
+    post:
+      consumes:
+      - application/json
+      description: Mengirim token QR dinamis dan koordinat GPS Siswa untuk divalidasi
+      parameters:
+      - description: Kirim Koordinat dan Token
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.AbsenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Posisi tervalidasi, Absen Sukses
+          schema:
+            $ref: '#/definitions/controllers.SuccessMessage'
+        "403":
+          description: Di luar jangkauan radius / QR Kadaluwarsa
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      security:
+      - BearerAuth: []
+      summary: Submit Absensi Geofencing (Siswa)
+      tags:
+      - 2. Operasional Siswa
+  /siswa/riwayat:
+    get:
+      description: Menampilkan data historis absensi milik siswa yang sedang login
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Daftar Riwayat
+          schema:
+            items:
+              $ref: '#/definitions/controllers.RiwayatAbsenSiswa'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Riwayat Absensi Siswa
+      tags:
+      - 2. Operasional Siswa
+securityDefinitions:
+  BearerAuth:
+    description: 'Masukkan token JWT dengan format: Bearer {token}'
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

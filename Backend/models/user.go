@@ -8,10 +8,12 @@ type LoginRequest struct {
 }
 
 // User adalah representasi dari tabel 'users' di database MariaDB kita.
-type User struct {
-	ID        int    `json:"id"`
-	Username  string `json:"username"`
-	Password  string `json:"-"` // Tanda "-" memastikan password tidak akan pernah ikut terkirim ke klien demi keamanan
-	Role      string `json:"role"`
-	CreatedAt string `json:"created_at"`
+type UserDashboardRow struct {
+	ID           int    `json:"id"`
+	NamaLengkap  string `json:"nama_lengkap"`
+	Username     string `json:"username"` // NIS/NIP sesuai ERD
+	Role         string `json:"role"`
+	LastLogin    string `json:"last_login"`
+	DaysInactive int    `json:"days_inactive"`
+	Status       string `json:"status"`
 }
