@@ -1,0 +1,18 @@
+DB_USER=root
+DB_PASSWORD="Hafizh@2610"
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_NAME=db_absensi
+
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_EMAIL=absensibackup0@gmail.com
+SMTP_PASSWORD=mcgx ojbt axtw ztep
+FRONTEND_URL="https://frontend-absensi-6sing31l5-nhwk-cpus-projects.vercel.app"
+
+JWT_SECRET=kunci_rahasia_absensi_super_aman
+
+# Konfigurasi Geofencing Tempat Les
+TITIK_LES_LAT=-6.137235195276842
+TITIK_LES_LON=106.8749273834898
+RADIUS_TOLERANSI=50

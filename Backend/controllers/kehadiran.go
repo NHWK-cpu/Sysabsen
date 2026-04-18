@@ -96,9 +96,21 @@ func CatatAbsenManual(w http.ResponseWriter, r *http.Request) {
 	// 2. Simpan ke Database
 	// PERHATIKAN: Kita melakukan hardcode tulisan 'Manual by Guru' langsung di query SQL-nya
 	// Ini adalah bentuk perlindungan mutlak dari Backend.
-	query := "INSERT INTO log_kehadiran (sesi_id, siswa_id, status_kehadiran, metode_absen) VALUES (?, ?, ?, 'Manual by Guru')"
-	
-	_, err := config.DB.Exec(query, req.SesiID, req.SiswaID, req.StatusKehadiran)
+	// Di dalam fungsi CatatAbsenManual
+	// ... di dalam fungsi CatatAbsenManual ...
+
+	query := `
+	INSERT INTO log_kehadiran (sesi_id, siswa_id, tanggal, status_kehadiran, metode_absen, waktu_absen)
+	VALUES (?, ?, ?, ?, 'Manual by Guru', NOW())
+	ON DUPLICATE KEY UPDATE
+	status_kehadiran = VALUES(status_kehadiran),
+	metode_absen = VALUES(metode_absen),
+	waktu_absen = NOW()
+	`
+
+	_, err := config.DB.Exec(query, req.SesiID, req.SiswaID, req.Tanggal, req.StatusKehadiran)
+
+	// ... lanjut ke pengecekan error ...
 	if err != nil {
 		// Jika error, biasanya karena ID Sesi atau ID Siswa tidak ada di database (ditolak oleh Foreign Key)
 		http.Error(w, `{"error": "Gagal mencatat kehadiran manual. Cek kembali ID Sesi dan ID Siswa."}`, http.StatusInternalServerError)

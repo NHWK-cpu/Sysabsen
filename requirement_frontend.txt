@@ -21,3 +21,5 @@ Kalau kamu ingin langsung ke "fitur utama".
     Target: Guru generate QR (simpan ke DB) -> Siswa scan -> API Go validasi (Cek device ID, cek lokasi, cek waktu).
 
     Kenapa? Ini bagian paling kompleks. Semakin cepat kita tes, semakin cepat kita tahu kalau ada logic yang kurang.
+
+

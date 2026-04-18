@@ -64,7 +64,7 @@ func AdminOnly(next http.HandlerFunc) http.HandlerFunc {
 		role := userInfo["role"].(string)
 
 		// Jika rolenya BUKAN admin, tendang keluar!
-		if role != "admin" {
+		if role != "admin" && role != "super_admin" {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusForbidden) // Status 403: Forbidden
 			w.Write([]byte(`{"error": "Akses ditolak. Anda bukan Admin!"}`))
@@ -74,6 +74,23 @@ func AdminOnly(next http.HandlerFunc) http.HandlerFunc {
 		// Jika dia Admin, persilakan masuk ke Controller
 		next.ServeHTTP(w, r)
 	}
+}
+
+// TAMBAHAN: Satpam lapis ketiga KHUSUS Super Admin
+func SuperAdminOnly(next http.HandlerFunc) http.HandlerFunc {
+    return func(w http.ResponseWriter, r *http.Request) {
+        userInfo := r.Context().Value("userInfo").(jwt.MapClaims)
+        role := userInfo["role"].(string)
+
+        // HANYA super_admin yang boleh lewat
+        if role != "super_admin" {
+            w.Header().Set("Content-Type", "application/json")
+            w.WriteHeader(http.StatusForbidden)
+            w.Write([]byte(`{"error": "Akses ditolak. Fitur ini hanya untuk Super Admin!"}`))
+            return
+        }
+        next.ServeHTTP(w, r)
+    }
 }
 
 // SiswaOnly adalah satpam lapis kedua khusus untuk rute Siswa

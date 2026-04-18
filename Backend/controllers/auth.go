@@ -37,15 +37,16 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	var dbPassword string
 	var userId int
 	var userRole string
-	
+
 	// ==========================================
-	// PERUBAHAN: Kita hapus "AND role = 'admin'"
-	// Sekarang query ini mencari user siapapun itu (Admin/Guru/Siswa)
+	// PERUBAHAN: Menambahkan AND is_active = 1
+	// Hanya user yang aktif yang bisa ditemukan oleh query ini
 	// ==========================================
-	err := config.DB.QueryRow("SELECT id, password, role FROM users WHERE username = ?", req.Username).Scan(&userId, &dbPassword, &userRole)
+	err := config.DB.QueryRow("SELECT id, password, role FROM users WHERE username = ? AND is_active = 1", req.Username).Scan(&userId, &dbPassword, &userRole)
 
 	if err != nil {
-		http.Error(w, `{"error": "Username atau password salah"}`, http.StatusUnauthorized)
+		// Pesan error diubah sedikit agar lebih informatif
+		http.Error(w, `{"error": "Username/password salah atau akun telah dinonaktifkan"}`, http.StatusUnauthorized)
 		return
 	}
 
@@ -54,10 +55,25 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	config.DB.Exec("UPDATE users SET last_login = NOW() WHERE id = ?", userId)
+
+	var namaUser string
+	if userRole == "guru" {
+		// Catatan: Sesuaikan 'nama_guru' dengan nama kolom di tabel 'guru' milikmu
+		errGuru := config.DB.QueryRow("SELECT nama_lengkap FROM guru WHERE user_id = ?", userId).Scan(&namaUser)
+		if errGuru != nil {
+			namaUser = req.Username // Fallback jika tidak ketemu
+		}
+	} else {
+		namaUser = req.Username // Jika yang login adalah admin
+	}
+
 	claims := jwt.MapClaims{
-		"user_id": userId,
-		"role":    userRole, // Role siswa akan otomatis tercatat di dalam tiket ini
-		"exp":     time.Now().Add(time.Hour * 24).Unix(), 
+		"user_id":  userId,
+		"role":     userRole,
+		"username": req.Username,
+		"nama":     namaUser,
+		"exp":      time.Now().Add(time.Minute * 90).Unix(),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -70,26 +86,24 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	
-	// PERUBAHAN KEDUA: Kita kembalikan informasi 'role' ke klien agar Frontend
-	// tahu apakah harus membuka halaman dashboard admin, atau halaman absen siswa.
+
 	response := fmt.Sprintf(`{"message": "Login sukses!", "role": "%s", "token": "%s"}`, userRole, tokenString)
 	w.Write([]byte(response))
 }
 
-func generateTokenManual(userID int, role string) (string, error) {
-	// 1. Tentukan isi "surat" (Claims)
+func generateTokenManual(userID int, role string, username string, namaLengkap string, namaSekolah string) (string, error) {
 	claims := jwt.MapClaims{
-		"user_id": userID,
-		"role":    role,
-		"exp":     time.Now().Add(24 * time.Hour).Unix(), // Berlaku 24 jam
-		"iat":     time.Now().Unix(),
+		"user_id":      userID,
+		"role":         role,
+		"username":     username,
+		"nama_lengkap": namaLengkap, // Sinkron dengan pembacaan decodedPayload.nama_lengkap
+		"nama_sekolah": namaSekolah, // Ini yang dicari oleh dashboard frontend!
+		"exp":          time.Now().Add(60 * time.Minute).Unix(),
+		"iat":          time.Now().Unix(),
 	}
 
-	// 2. Buat objek token dengan metode tanda tangan HS256
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	// 3. Tanda tangani token dengan Secret Key kita
 	tokenString, err := token.SignedString(config.JWT_KEY)
 	if err != nil {
 		return "", err
@@ -110,40 +124,35 @@ func generateTokenManual(userID int, role string) (string, error) {
 // @Router /login/siswa [post]
 func LoginSiswa(w http.ResponseWriter, r *http.Request) {
 	var input struct {
-		Username     string `json:"username"`     // Ganti Email -> Username
-		Password     string `json:"password"`
-		DeviceToken  string `json:"device_token"`
+		Username    string `json:"username"`
+		Password    string `json:"password"`
+		DeviceToken string `json:"device_token"`
 	}
-	
+
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		http.Error(w, "Input tidak valid", 400)
 		return
 	}
 
-	// 1. Ambil data User berdasarkan USERNAME (Sesuai ERD)
 	var userID int
 	var hashedPassword string
-	// Query diarahkan ke kolom 'username' pada tabel 'users'
-	err := config.DB.QueryRow("SELECT id, password FROM users WHERE username = ? AND role = 'siswa'", input.Username).Scan(&userID, &hashedPassword)
+
+	err := config.DB.QueryRow("SELECT id, password FROM users WHERE username = ? AND role = 'siswa' AND is_active = 1", input.Username).Scan(&userID, &hashedPassword)
 	if err != nil {
-		// Jika username tidak ditemukan
-		http.Error(w, "Username atau Password salah", 401)
+		http.Error(w, "Username/Password salah atau akun Anda telah dinonaktifkan", 401)
 		return
 	}
 
-	// 2. Verifikasi Password (Bcrypt)
 	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(input.Password))
 	if err != nil {
 		http.Error(w, "Username atau Password salah", 401)
 		return
 	}
 
-	// 3. CEK DEVICE BINDING
 	var status string
 	err = config.DB.QueryRow("SELECT status FROM user_devices WHERE user_id = ? AND device_cookie_token = ?", userID, input.DeviceToken).Scan(&status)
 
 	if err != nil {
-		// KONDISI A: Perangkat Belum Terdaftar
 		userAgent := r.Header.Get("User-Agent")
 		_, insertErr := config.DB.Exec(
 			"INSERT INTO user_devices (user_id, device_cookie_token, user_agent, status) VALUES (?, ?, ?, 'pending')",
@@ -157,7 +166,6 @@ func LoginSiswa(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// KONDISI B: Cek Status Approval Perangkat
 	if status == "pending" {
 		http.Error(w, "Akses ditolak. Perangkat Anda masih menunggu persetujuan Admin.", http.StatusForbidden)
 		return
@@ -166,8 +174,28 @@ func LoginSiswa(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// KONDISI C: Approved! Buat JWT Token
-	token, errToken := generateTokenManual(userID, "siswa")
+	config.DB.Exec("UPDATE users SET last_login = NOW() WHERE id = ?", userID)
+	
+	var namaSiswa, namaSekolah string
+	
+	// PERUBAHAN: Tarik sekalian nama_sekolah dari tabel siswa
+	errQuery := config.DB.QueryRow("SELECT nama_lengkap, nama_sekolah FROM siswa WHERE user_id = ?", userID).Scan(&namaSiswa, &namaSekolah)
+	
+	if errQuery != nil {
+		namaSiswa = input.Username
+		
+		// Fallback anti-badai: Cari di tabel users jika ternyata disimpannya di kolom identifier
+		var identifier string
+		errFallback := config.DB.QueryRow("SELECT identifier FROM users WHERE id = ?", userID).Scan(&identifier)
+		if errFallback == nil && identifier != "" {
+			namaSekolah = identifier
+		} else {
+			namaSekolah = "Asal Sekolah Tidak Diketahui"
+		}
+	}
+
+	// PERUBAHAN: Kirim variabel namaSekolah ke fungsi pembuat token
+	token, errToken := generateTokenManual(userID, "siswa", input.Username, namaSiswa, namaSekolah)
 	if errToken != nil {
 		http.Error(w, "Gagal membuat sesi login", 500)
 		return

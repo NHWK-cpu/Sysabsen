@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 
 	"backend-absensi/config"
 
@@ -144,32 +145,107 @@ func RejectDevice(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Perangkat telah berhasil ditolak. Siswa tidak akan bisa login dari perangkat ini."))
 }
 
-// ResetPasswordSiswa: Admin mereset password setelah memverifikasi kata_kunci
+// GetSiswaClue godoc
+// @Summary Ambil Clue / Pertanyaan Keamanan Siswa
+// @Tags 4. Admin - Device & Keamanan
+// @Produce json
+// @Param username query string true "Username Siswa"
+// @Router /admin/siswa/clue [get]
+func GetSiswaClue(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, `{"error": "Gunakan method GET"}`, http.StatusMethodNotAllowed)
+		return
+	}
+
+	username := r.URL.Query().Get("username")
+	if username == "" {
+		http.Error(w, `{"error": "Username tidak diberikan"}`, http.StatusBadRequest)
+		return
+	}
+
+	var label string
+	query := `
+	SELECT s.label_kata_kunci
+	FROM users u
+	JOIN siswa s ON u.id = s.user_id
+	WHERE u.username = ? AND u.role = 'siswa'`
+
+	err := config.DB.QueryRow(query, username).Scan(&label)
+	if err != nil {
+		http.Error(w, `{"error": "Siswa atau pertanyaan keamanan tidak ditemukan"}`, http.StatusNotFound)
+		return
+	}
+
+	// Kembalikan dalam format JSON agar mudah dibaca Svelte
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"label_kata_kunci": label})
+}
+
+// ResetPasswordSiswa godoc
+// @Summary Reset Password Siswa (Lupa Password)
+// @Description Admin mereset password siswa dengan validasi Kata Kunci Rahasia
+// @Tags 4. Admin - Device & Keamanan
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Router /admin/siswa/reset-password [put]
 func ResetPasswordSiswa(w http.ResponseWriter, r *http.Request) {
+	// Svelte kita sekarang menggunakan method PUT (Boleh diganti ke POST jika kamu mau, tapi Svelte di atas pakai PUT)
+	if r.Method != http.MethodPut && r.Method != http.MethodPost {
+		http.Error(w, `{"error": "Method tidak diizinkan"}`, http.StatusMethodNotAllowed)
+		return
+	}
+
 	var input struct {
-		NIS         string `json:"nis"`
+		Username    string `json:"username"` // Kita pakai Username agar sinkron dengan Frontend
 		KataKunci   string `json:"kata_kunci"`
 		NewPassword string `json:"new_password"`
 	}
-	json.NewDecoder(r.Body).Decode(&input)
 
-	// 1. Verifikasi apakah NIS dan Kata Kunci cocok
-	var userID int
-	err := config.DB.QueryRow("SELECT user_id FROM siswa WHERE nis = ? AND kata_kunci = ?", input.NIS, input.KataKunci).Scan(&userID)
-	if err != nil {
-		http.Error(w, "NIS atau Kata Kunci salah. Verifikasi gagal.", 403)
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		http.Error(w, `{"error": "Format JSON tidak valid"}`, http.StatusBadRequest)
 		return
 	}
 
-	// 2. Hash Password Baru
-	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(input.NewPassword), bcrypt.DefaultCost)
+	// 1. Tarik ID User dan Kata Kunci asli dari database berdasarkan Username
+	var userID int
+	var dbKataKunci string
 
-	// 3. Update di tabel users
+	queryCheck := `
+	SELECT u.id, s.kata_kunci
+	FROM users u
+	JOIN siswa s ON u.id = s.user_id
+	WHERE u.username = ? AND u.role = 'siswa'`
+
+	err := config.DB.QueryRow(queryCheck, input.Username).Scan(&userID, &dbKataKunci)
+	if err != nil {
+		http.Error(w, `{"error": "Data siswa tidak ditemukan"}`, http.StatusNotFound)
+		return
+	}
+
+	// 2. Verifikasi Jawaban (dibuat Case-Insensitive dan hapus spasi berlebih)
+	if strings.ToLower(strings.TrimSpace(input.KataKunci)) != strings.ToLower(strings.TrimSpace(dbKataKunci)) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusUnauthorized) // 401 Unauthorized
+		w.Write([]byte(`{"error": "Jawaban Keamanan SALAH!"}`))
+		return
+	}
+
+	// 3. Hash Password Baru menggunakan Bcrypt
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.NewPassword), bcrypt.DefaultCost)
+	if err != nil {
+		http.Error(w, `{"error": "Gagal mengenkripsi password"}`, http.StatusInternalServerError)
+		return
+	}
+
+	// 4. Update di tabel users
 	_, err = config.DB.Exec("UPDATE users SET password = ? WHERE id = ?", string(hashedPassword), userID)
 	if err != nil {
-		http.Error(w, "Gagal mengupdate password", 500)
+		http.Error(w, `{"error": "Gagal menyimpan password ke database"}`, http.StatusInternalServerError)
 		return
 	}
 
-	w.Write([]byte("Password siswa berhasil direset!"))
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(`{"message": "Password siswa berhasil direset!"}`))
 }

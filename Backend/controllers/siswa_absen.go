@@ -6,17 +6,12 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"log"
 
 	"backend-absensi/config"
 	"backend-absensi/helpers"
 	"github.com/golang-jwt/jwt/v5"
 )
-
-// Koordinat Tempat Les (Silakan ganti dengan koordinat aslinya nanti)
-// Contoh: Koordinat pusat kota Surabaya
-const TitikLesLat = -7.250445
-const TitikLesLon = 112.768845
-const RadiusBatas = 50.0 // Toleransi maksimal 50 meter
 
 // SubmitAbsen godoc
 // @Summary Submit Absensi Geofencing (Siswa)
@@ -89,7 +84,9 @@ func SubmitAbsen(w http.ResponseWriter, r *http.Request) {
 	})
 
 	if err != nil {
-		// Jika err tidak nil, kemungkinan besar token sudah LEWAT 30 DETIK (Expired) atau dipalsukan
+		// TAMBAHKAN BARIS INI: Biar error aslinya tercetak di journalctl VPS
+		log.Printf("GAGAL VERIFIKASI QR DARI USER %d: %v", userID, err)
+
 		http.Error(w, `{"error": "QR Code tidak valid atau sudah kedaluwarsa. Silakan minta Guru menampilkan QR baru."}`, http.StatusForbidden)
 		return
 	}
@@ -124,7 +121,7 @@ func SubmitAbsen(w http.ResponseWriter, r *http.Request) {
 
 	// 5. SIMPAN KE LOG KEHADIRAN (Sesuai ERD)
 	_, err = config.DB.Exec(
-		"INSERT INTO log_kehadiran (sesi_id, siswa_id, status_kehadiran, metode_absen) VALUES (?, ?, 'hadir', 'qr_scan')",
+		"INSERT INTO log_kehadiran (sesi_id, siswa_id, status_kehadiran, metode_absen, tanggal) VALUES (?, ?, 'Hadir', 'qr_scan', CURDATE())",
 		input.SesiID, siswaID,
 	)
 

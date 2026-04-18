@@ -13,7 +13,7 @@ type GuruAbsenRequest struct {
 	SesiID          int    `json:"sesi_id"`
 	SiswaID         int    `json:"siswa_id"`
 	StatusKehadiran string `json:"status_kehadiran"`
-	// Kita sengaja TIDAK memasukkan metode_absen di sini agar klien tidak bisa mengaturnya
+	Tanggal         string `json:"tanggal"` // <-- TAMBAHKAN INI
 }
 
 // AbsenRequest adalah data riwayat absen di hari lampau

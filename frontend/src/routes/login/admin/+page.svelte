@@ -1,11 +1,55 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+
 	let username = $state('');
 	let password = $state('');
 	let showPassword = $state(false);
 
-	const handleSubmit = (e: Event) => {
+	// Tambahan state untuk API
+	let isLoading = $state(false);
+	let errorMessage = $state('');
+
+	const API_BASE_URL = import.meta.env.VITE_API_URL;
+
+	// Logika Submit ke API Backend
+	const handleSubmit = async (e: Event) => {
 		e.preventDefault();
-		console.log('Admin Login:', { username, password });
+		isLoading = true;
+		errorMessage = '';
+
+		try {
+			const res = await fetch(`${API_BASE_URL}/login`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ username, password })
+			});
+
+			if (!res.ok) {
+				const errorText = await res.text();
+				try {
+					const errJson = JSON.parse(errorText);
+					errorMessage = errJson.error || 'Login gagal.';
+				} catch {
+					errorMessage = errorText || 'Username atau password salah.';
+				}
+				isLoading = false;
+				return;
+			}
+
+			const data = await res.json();
+
+			// Simpan token ke LocalStorage
+			localStorage.setItem('jwt_token', data.token);
+			localStorage.setItem('user_role', data.role);
+
+			// Arahkan ke Dashboard Admin
+			goto('/admin/dashboard');
+		} catch (err) {
+			console.error('Network Error:', err);
+			errorMessage = 'Tidak dapat terhubung ke server.';
+		} finally {
+			isLoading = false;
+		}
 	};
 </script>
 
@@ -41,17 +85,26 @@
 			<p class="text-sm font-medium text-slate-400">Sistem Manajemen Absensi</p>
 		</div>
 
+		{#if errorMessage}
+			<div
+				class="mb-6 rounded-2xl border border-red-100 bg-red-50 p-4 text-center text-xs font-black tracking-widest text-red-600 uppercase"
+			>
+				{errorMessage}
+			</div>
+		{/if}
+
 		<form onsubmit={handleSubmit} class="space-y-6">
 			<div class="flex flex-col gap-2">
 				<label
 					for="username"
-					class="ml-1 text-xs font-black tracking-wider text-slate-500 uppercase">Admin ID</label
+					class="ml-1 text-xs font-black tracking-wider text-slate-500 uppercase"
+					>Admin Username</label
 				>
 				<input
 					type="text"
 					id="username"
 					bind:value={username}
-					placeholder="ID Administrator"
+					placeholder="Username Administrator"
 					class="w-full rounded-2xl border-2 border-slate-100 bg-slate-50 px-5 py-4 font-medium transition-all outline-none focus:border-slate-800 focus:bg-white"
 					required
 				/>
@@ -110,9 +163,16 @@
 
 			<button
 				type="submit"
-				class="w-full rounded-2xl bg-slate-800 py-4 text-sm font-black tracking-widest text-white uppercase shadow-xl transition-all hover:bg-black active:scale-95"
+				disabled={isLoading}
+				class="flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-800 py-4 text-sm font-black tracking-widest text-white uppercase shadow-xl transition-all hover:bg-black active:scale-95 disabled:bg-slate-500"
 			>
-				Authorize Login
+				{#if isLoading}
+					<span
+						class="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"
+					></span>
+				{:else}
+					Authorize Login
+				{/if}
 			</button>
 		</form>
 	</div>

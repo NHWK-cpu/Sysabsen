@@ -1,11 +1,77 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+
 	let username = $state('');
 	let password = $state('');
 	let showPassword = $state(false);
 
-	const handleSubmit = (e: Event) => {
+	// Tambahan state untuk API
+	let isLoading = $state(false);
+	let errorMessage = $state('');
+	let infoMessage = $state('');
+
+	const API_BASE_URL = import.meta.env.VITE_API_URL;
+
+	// Logika Device Token
+	const getDeviceToken = () => {
+		let token = localStorage.getItem('device_token');
+		if (!token) {
+			token = 'DEV-' + Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
+			localStorage.setItem('device_token', token);
+		}
+		return token;
+	};
+
+	// Logika Submit ke API Backend
+	const handleSubmit = async (e: Event) => {
 		e.preventDefault();
-		console.log('Login:', { username, password });
+		isLoading = true;
+		errorMessage = '';
+		infoMessage = '';
+
+		try {
+			const payload = {
+				username,
+				password,
+				device_token: getDeviceToken()
+			};
+
+			const res = await fetch(`${API_BASE_URL}/login/siswa`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(payload)
+			});
+
+			if (!res.ok) {
+				const errorText = await res.text();
+				// 403 untuk status Pending/Ditolak dari Admin
+				if (res.status === 403) {
+					infoMessage = errorText;
+				} else {
+					try {
+						const errJson = JSON.parse(errorText);
+						errorMessage = errJson.error || 'Login gagal.';
+					} catch {
+						errorMessage = errorText || 'Username atau password salah.';
+					}
+				}
+				isLoading = false;
+				return;
+			}
+
+			const data = await res.json();
+
+			// Simpan token dan rute ke scanner
+			localStorage.setItem('jwt_token', data.data.token);
+			localStorage.setItem('user_role', data.data.role);
+
+			goto('/student/scanner');
+		} catch (err) {
+			console.error('Network Error:', err);
+			errorMessage = 'Tidak dapat terhubung ke server.';
+		} finally {
+			isLoading = false;
+		}
 	};
 </script>
 
@@ -32,6 +98,22 @@
 			<h1 class="text-2xl font-black tracking-tight text-slate-800 uppercase">Login Student</h1>
 			<p class="text-sm font-medium text-slate-400">Masuk untuk melakukan absensi</p>
 		</div>
+
+		{#if errorMessage}
+			<div
+				class="mb-6 rounded-2xl border border-red-100 bg-red-50 p-4 text-center text-xs font-black tracking-widest text-red-600 uppercase"
+			>
+				{errorMessage}
+			</div>
+		{/if}
+
+		{#if infoMessage}
+			<div
+				class="mb-6 rounded-2xl border border-amber-100 bg-amber-50 p-4 text-center text-xs leading-relaxed font-black tracking-widest text-amber-700 uppercase"
+			>
+				{infoMessage}
+			</div>
+		{/if}
 
 		<form onsubmit={handleSubmit} class="space-y-6">
 			<div class="flex flex-col gap-2">
@@ -107,9 +189,16 @@
 
 			<button
 				type="submit"
-				class="w-full rounded-2xl bg-brand-blue py-4 text-sm font-black tracking-widest text-white uppercase shadow-xl shadow-blue-500/20 transition-all hover:bg-blue-700 active:scale-95"
+				disabled={isLoading}
+				class="flex w-full items-center justify-center gap-2 rounded-2xl bg-brand-blue py-4 text-sm font-black tracking-widest text-white uppercase shadow-xl shadow-blue-500/20 transition-all hover:bg-blue-700 active:scale-95 disabled:bg-blue-300"
 			>
-				Sign In
+				{#if isLoading}
+					<span
+						class="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"
+					></span>
+				{:else}
+					Sign In
+				{/if}
 			</button>
 		</form>
 

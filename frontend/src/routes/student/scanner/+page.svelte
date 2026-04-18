@@ -1,16 +1,44 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import { browser } from '$app/environment';
+	import { goto } from '$app/navigation';
 
 	let scanResult = $state<string | null>(null);
 	let scannerState = $state<'loading' | 'scanning' | 'success' | 'error'>('loading');
 	let html5Qrcode: any;
 	let errorMessage = $state<string>('');
 
-	const student = { name: 'Ahmad Hafizh', id: 'SLC-001', role: 'Student' };
+	// PERUBAHAN: Ganti id menjadi school untuk menampung Asal Sekolah
+	let student = $state({ name: 'Memuat...', school: '...', role: 'Student' });
 
 	onMount(async () => {
 		if (browser) {
+			const token = localStorage.getItem('jwt_token');
+
+			if (!token) {
+				goto('/login/student');
+				return;
+			}
+
+			try {
+				// Bongkar (Decode) bagian payload dari JWT
+				const payloadBase64 = token.split('.')[1];
+				// atob() adalah fungsi bawaan browser untuk decode Base64
+				const decodedPayload = JSON.parse(atob(payloadBase64));
+
+				// PERUBAHAN: Masukkan data asli ke state student!
+				// Pastikan key-nya sesuai dengan yang digenerate backend di dalam token
+				student = {
+					name: decodedPayload.nama_lengkap || decodedPayload.username || 'Siswa',
+					school: decodedPayload.nama_sekolah || 'Asal Sekolah Tidak Diketahui',
+					role: 'Student'
+				};
+			} catch (e) {
+				console.error('Token tidak valid atau korup');
+				localStorage.removeItem('jwt_token');
+				goto('/login/student');
+				return;
+			}
 			try {
 				const { Html5Qrcode } = await import('html5-qrcode');
 				html5Qrcode = new Html5Qrcode('qr-reader');
@@ -35,11 +63,78 @@
 
 		const config = { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 };
 
-		const onSuccess = (decodedText: string) => {
-			scanResult = decodedText;
-			scannerState = 'success';
-			html5Qrcode.stop();
-			console.log('Mengirim data absensi:', { studentId: student.id, qrData: decodedText });
+		const onSuccess = async (decodedText: string) => {
+			html5Qrcode.stop(); // Matikan kamera segera setelah dapat QR
+			scannerState = 'loading'; // Ubah state ke loading sambil nunggu GPS & API
+			scanResult = null;
+
+			// 1. Ambil Token Login User (Sesuaikan dengan tempat kamu menyimpan token JWT saat login)
+			const userToken = localStorage.getItem('jwt_token');
+
+			// 2. Ekstrak SesiID dari QR Token
+			// (Karena backend butuh sesi_id, kita bongkar saja dari token QR-nya)
+			let sesiId = 0;
+			try {
+				const payloadBase64 = decodedText.split('.')[1];
+				const decodedPayload = JSON.parse(atob(payloadBase64));
+				sesiId = parseInt(decodedPayload.sesi_id);
+			} catch (e) {
+				errorMessage = 'Format QR Code tidak valid!';
+				scannerState = 'error';
+				return;
+			}
+
+			// 3. Minta Akses GPS (Wajib untuk Geofencing)
+			if (!navigator.geolocation) {
+				errorMessage = 'GPS tidak didukung di browser ini.';
+				scannerState = 'error';
+				return;
+			}
+
+			navigator.geolocation.getCurrentPosition(
+				async (position) => {
+					const lat = position.coords.latitude;
+					const lon = position.coords.longitude;
+
+					// 4. Kirim Data Lengkap ke Backend (Vercel Proxy)
+					try {
+						const API_URL = import.meta.env.VITE_API_URL;
+						const res = await fetch(`${API_URL}/siswa/absen/submit`, {
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json',
+								Authorization: `Bearer ${userToken}` // Kunci masuk backend
+							},
+							body: JSON.stringify({
+								sesi_id: sesiId,
+								qr_token: decodedText,
+								latitude: lat,
+								longitude: lon
+							})
+						});
+
+						const data = await res.json();
+
+						if (res.ok) {
+							scanResult = data.message; // Menampilkan pesan sukses dari Go
+							scannerState = 'success';
+						} else {
+							errorMessage = data.error || 'Gagal melakukan absensi.';
+							scannerState = 'error';
+						}
+					} catch (err) {
+						errorMessage = 'Gagal terhubung ke server backend.';
+						scannerState = 'error';
+					}
+				},
+				(geoErr) => {
+					errorMessage = 'Gagal mendapatkan lokasi. Pastikan izin GPS aktif!';
+					scannerState = 'error';
+				},
+				{
+					enableHighAccuracy: true // Minta akurasi GPS paling tinggi
+				}
+			);
 		};
 		const onFail = () => {};
 
@@ -66,6 +161,13 @@
 	};
 
 	const retryScan = () => startScanner();
+
+	const handleLogout = () => {
+		if (browser) {
+			localStorage.removeItem('jwt_token');
+			goto('/login/student'); // Pastikan route ini sesuai dengan halaman login kamu
+		}
+	};
 </script>
 
 <div class="flex min-h-screen flex-col bg-slate-50 font-sans">
@@ -84,6 +186,7 @@
 			</div>
 		</div>
 		<button
+			onclick={handleLogout}
 			class="rounded-xl bg-slate-50 px-4 py-2 text-[10px] font-black tracking-widest text-slate-500 uppercase transition-colors hover:bg-slate-100"
 		>
 			Logout
@@ -99,9 +202,10 @@
 				<h2 class="mt-0.5 text-base font-black tracking-tight text-slate-800">{student.name}</h2>
 			</div>
 			<div
-				class="rounded-lg bg-blue-50 px-3 py-1.5 text-[10px] font-black tracking-widest text-brand-blue uppercase"
+				class="max-w-[120px] truncate rounded-lg bg-blue-50 px-3 py-1.5 text-right text-[10px] font-black tracking-widest text-brand-blue uppercase"
+				title={student.school}
 			>
-				{student.id}
+				{student.school}
 			</div>
 		</div>
 

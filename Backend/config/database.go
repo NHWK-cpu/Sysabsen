@@ -12,25 +12,27 @@ import (
 var DB *sql.DB
 
 func ConnectDB() {
-	// Mengambil data dari environment variables
-	dbUser := os.Getenv("DB_USER")
-	dbPass := os.Getenv("DB_PASSWORD")
-	dbHost := os.Getenv("DB_HOST")
-	dbPort := os.Getenv("DB_PORT")
-	dbName := os.Getenv("DB_NAME")
+    dbUser := os.Getenv("DB_USER")
+    dbPass := os.Getenv("DB_PASSWORD")
+    dbHost := os.Getenv("DB_HOST")
+    dbPort := os.Getenv("DB_PORT")
+    dbName := os.Getenv("DB_NAME")
 
-	// Merakit DSN secara dinamis
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", dbUser, dbPass, dbHost, dbPort, dbName)
+    // Tambahkan parseTime=true untuk handle tipe data DATE/DATETIME di Go
+    // Tambahkan tls=true jika Filess.io mendukung koneksi aman
+    dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true&tls=preferred", 
+        dbUser, dbPass, dbHost, dbPort, dbName)
 
-	var err error
-	DB, err = sql.Open("mysql", dsn)
-	if err != nil {
-		log.Fatal("Gagal menyiapkan konfigurasi database: ", err)
-	}
+    db, err := sql.Open("mysql", dsn)
+    if err != nil {
+        log.Fatalf("Gagal koneksi database: %v", err)
+    }
 
-	err = DB.Ping()
-	if err != nil {
-		log.Fatal("Gagal terhubung ke database! Error: ", err)
-	}
-	fmt.Println("Status: Database terhubung menggunakan konfigurasi .env!")
+    // Cek koneksi
+    if err := db.Ping(); err != nil {
+        log.Fatalf("Database tidak merespon: %v", err)
+    }
+
+    DB = db
+    log.Println("Berhasil terhubung ke database Filess.io!")
 }

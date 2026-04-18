@@ -11,7 +11,7 @@ type LoginRequest struct {
 type UserDashboardRow struct {
 	ID           int    `json:"id"`
 	NamaLengkap  string `json:"nama_lengkap"`
-	Username     string `json:"username"` // NIS/NIP sesuai ERD
+	Username     string `json:"username"` 
 	Role         string `json:"role"`
 	LastLogin    string `json:"last_login"`
 	DaysInactive int    `json:"days_inactive"`

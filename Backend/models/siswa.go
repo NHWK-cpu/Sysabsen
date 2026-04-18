@@ -4,7 +4,7 @@ package models
 type SiswaRequest struct {
 	Username       string `json:"username"`
 	Password       string `json:"password"`
-	NIS            string `json:"nis"`
+	NamaSekolah    string `json:"nama_sekolah"`
 	NamaLengkap    string `json:"nama_lengkap"`
 	LabelKataKunci string `json:"label_kata_kunci"` // Clue keamanan yang kamu minta
 	KataKunci      string `json:"kata_kunci"`       // Jawaban clue
@@ -14,7 +14,7 @@ type SiswaRequest struct {
 type SiswaResponse struct {
 	ID             int    `json:"id"`
 	Username       string `json:"username"`
-	NIS            string `json:"nis"`
+	NamaSekolah    string `json:"nama_sekolah"`
 	NamaLengkap    string `json:"nama_lengkap"`
 	LabelKataKunci string `json:"label_kata_kunci"`
 	// Perhatikan: Kita TIDAK memasukkan password atau kata_kunci di sini demi keamanan!
