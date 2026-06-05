@@ -9,7 +9,7 @@
 	let errorMessage = $state<string>('');
 
 	// PERUBAHAN: Ganti id menjadi school untuk menampung Asal Sekolah
-	let student = $state({ name: 'Memuat...', school: '...', role: 'Student' });
+	let student = $state({ name: 'Memuat...', school: '...', role: 'Siswa' });
 
 	onMount(async () => {
 		if (browser) {
@@ -31,7 +31,7 @@
 				student = {
 					name: decodedPayload.nama_lengkap || decodedPayload.username || 'Siswa',
 					school: decodedPayload.nama_sekolah || 'Asal Sekolah Tidak Diketahui',
-					role: 'Student'
+					role: 'Siswa'
 				};
 			} catch (e) {
 				console.error('Token tidak valid atau korup');
@@ -79,7 +79,7 @@
 				const decodedPayload = JSON.parse(atob(payloadBase64));
 				sesiId = parseInt(decodedPayload.sesi_id);
 			} catch (e) {
-				errorMessage = 'Format QR Code tidak valid!';
+				errorMessage = 'Format kode QR tidak valid!';
 				scannerState = 'error';
 				return;
 			}
@@ -154,7 +154,8 @@
 					throw new Error('Kamera tidak terdeteksi.');
 				}
 			} catch (fallbackErr: any) {
-				errorMessage = fallbackErr.message || 'Izin kamera ditolak / Kamera error';
+				errorMessage =
+					fallbackErr.message || 'Izin kamera ditolak atau kamera tidak bisa digunakan';
 				scannerState = 'error';
 			}
 		}
@@ -182,14 +183,14 @@
 			</div>
 			<div>
 				<h1 class="text-lg leading-none font-black tracking-tighter text-slate-800">ABSENSI</h1>
-				<p class="text-[10px] font-bold tracking-widest text-slate-400 uppercase">Student App</p>
+				<p class="text-[10px] font-bold tracking-widest text-slate-400 uppercase">Aplikasi siswa</p>
 			</div>
 		</div>
 		<button
 			onclick={handleLogout}
 			class="rounded-xl bg-slate-50 px-4 py-2 text-[10px] font-black tracking-widest text-slate-500 uppercase transition-colors hover:bg-slate-100"
 		>
-			Logout
+			Keluar
 		</button>
 	</header>
 
@@ -198,7 +199,7 @@
 			class="mb-6 flex w-full items-center justify-between rounded-3xl border border-slate-100 bg-white p-5 shadow-sm"
 		>
 			<div>
-				<p class="text-[10px] font-black tracking-widest text-slate-400 uppercase">Login Sebagai</p>
+				<p class="text-[10px] font-black tracking-widest text-slate-400 uppercase">Masuk sebagai</p>
 				<h2 class="mt-0.5 text-base font-black tracking-tight text-slate-800">{student.name}</h2>
 			</div>
 			<div
@@ -212,9 +213,9 @@
 		<div
 			class="relative w-full overflow-hidden rounded-[2.5rem] border border-slate-100 bg-white p-6 text-center shadow-xl shadow-slate-200/50"
 		>
-			<h3 class="mb-2 text-xl font-black tracking-tight text-slate-900 uppercase">Scan QR Kelas</h3>
+			<h3 class="mb-2 text-xl font-black tracking-tight text-slate-900 uppercase">Pindai QR kelas</h3>
 			<p class="mb-6 px-4 text-xs font-medium text-slate-500">
-				Arahkan kamera ke QR Code yang ditampilkan oleh guru di depan kelas.
+				Arahkan kamera ke kode QR yang ditampilkan guru di depan kelas.
 			</p>
 
 			<div
@@ -229,7 +230,7 @@
 						<span
 							class="h-8 w-8 animate-spin rounded-full border-4 border-slate-300 border-t-brand-blue"
 						></span>
-						<p class="text-xs font-bold tracking-widest uppercase">Akses Kamera...</p>
+						<p class="text-xs font-bold tracking-widest uppercase">Mengakses kamera…</p>
 					</div>
 				{:else if scannerState === 'error'}
 					<div
@@ -287,7 +288,7 @@
 						>
 					</div>
 					<h3 class="mb-2 text-xl font-black tracking-tight text-slate-900 uppercase">
-						Scan Berhasil!
+						Pemindaian berhasil!
 					</h3>
 					<p
 						class="mb-8 rounded-xl border border-slate-100 bg-slate-50 px-4 py-3 text-center text-[10px] font-bold tracking-widest break-all text-slate-500 uppercase"
@@ -298,7 +299,7 @@
 						onclick={retryScan}
 						class="w-full rounded-2xl bg-slate-900 py-4 text-xs font-black tracking-widest text-white uppercase transition-all hover:bg-black"
 					>
-						Scan Ulang
+						Pindai lagi
 					</button>
 				</div>
 			{/if}

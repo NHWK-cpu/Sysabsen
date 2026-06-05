@@ -1,0 +1,583 @@
+
+> frontend@0.0.1 build
+> vite build
+
+vite v8.0.7 building ssr environment for production...
+[2Ktransforming...13.36.50 [vite-plugin-svelte] src/routes/reset-password/+page.svelte:206:1 Unused CSS selector ".scale-in-center"
+https://svelte.dev/e/css_unused_selector
+204: 
+205: <style>
+206:   .scale-in-center {
+                       ^
+207:     animation: scale-in-center 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+208:   }
+13.36.50 [vite-plugin-svelte] src/routes/teacher/students/+page.svelte:514:5 Buttons and links should either contain text or have an `aria-label`, `aria-labelledby` or `title` attribute
+https://svelte.dev/e/a11y_consider_explicit_label
+512:         <div class="mb-6 flex items-center justify-between">
+513:           <h3 class="text-xl font-black tracking-tight text-slate-900 uppercase">Tambahkan siswa ke kelas</h3>
+514:           <button
+                      ^
+515:             onclick={() => (showAddModal = false)}
+516:             class="rounded-full bg-slate-100 p-2 text-slate-400 hover:text-red-500"
+13.36.51 [vite-plugin-svelte] src/routes/login/teacher/+page.svelte:268:6 A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control
+266:         <form onsubmit={handleForgotPassword} class="space-y-4 text-left">
+267:           <div class="flex flex-col gap-2">
+268:             <label class="ml-1 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+                  ^
+269:               >Nama pengguna</label
+270:             >
+13.36.51 [vite-plugin-svelte] src/routes/admin/dashboard/+page.svelte:1664:10 Buttons and links should either contain text or have an `aria-label`, `aria-labelledby` or `title` attribute
+https://svelte.dev/e/a11y_consider_explicit_label
+1662:                       {/if}
+1663:                     </button>
+1664:                     <button
+                                 ^
+1665:                       onclick={() => deletePeriod(period.id)}
+1666:                       class="p-2 text-red-400 transition-colors hover:text-red-600"
+13.36.51 [vite-plugin-svelte] src/routes/admin/dashboard/+page.svelte:2113:9 A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control
+2111:               <div class="space-y-5">
+2112:                 <div class="flex flex-col gap-2">
+2113:                   <label
+                         ^
+2114:                     class="ml-1 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+2115:                     >Nama Lengkap</label
+13.36.51 [vite-plugin-svelte] src/routes/admin/dashboard/+page.svelte:2125:9 A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control
+2123:                 </div>
+2124:                 <div class="flex flex-col gap-2">
+2125:                   <label
+                         ^
+2126:                     class="ml-1 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+2127:                     >Nama pengguna</label
+13.36.51 [vite-plugin-svelte] src/routes/admin/dashboard/+page.svelte:2137:9 A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control
+2135:                 </div>
+2136:                 <div class="flex flex-col gap-2">
+2137:                   <label
+                         ^
+2138:                     class="ml-1 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+2139:                     >{activeMenu === 'guru' ? 'NIP (Opsional)' : 'Asal Sekolah'}</label
+13.36.51 [vite-plugin-svelte] src/routes/admin/dashboard/+page.svelte:2152:10 A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control
+2150:                 {#if !isEditing}
+2151:                   <div class="flex flex-col gap-2">
+2152:                     <label
+                           ^
+2153:                       class="ml-1 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+2154:                       >Kata sandi awal</label
+13.36.51 [vite-plugin-svelte] src/routes/admin/dashboard/+page.svelte:2167:11 A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control
+2165:                   {#if !isEditing}
+2166:                     <div class="flex flex-col gap-2">
+2167:                       <label
+                             ^
+2168:                         class="ml-1 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+2169:                         >Label petunjuk keamanan</label
+13.36.51 [vite-plugin-svelte] src/routes/admin/dashboard/+page.svelte:2179:11 A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control
+2177:                     </div>
+2178:                     <div class="flex flex-col gap-2">
+2179:                       <label
+                             ^
+2180:                         class="ml-1 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+2181:                         >Jawaban Keamanan</label
+13.36.51 [vite-plugin-svelte] src/routes/admin/dashboard/+page.svelte:2193:10 A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control
+2191:                 {:else}
+2192:                   <div class="flex flex-col gap-2">
+2193:                     <label
+                           ^
+2194:                       class="ml-1 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+2195:                       >Alamat email</label
+13.36.51 [vite-plugin-svelte] src/routes/admin/dashboard/+page.svelte:2209:8 A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control
+2207:             <div class="space-y-5">
+2208:               <div class="flex flex-col gap-2">
+2209:                 <label class="ml-1 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+                       ^
+2210:                   >Nama Kelas</label
+2211:                 >
+13.36.51 [vite-plugin-svelte] src/routes/admin/dashboard/+page.svelte:2220:8 A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control
+2218:               </div>
+2219:               <div class="flex flex-col gap-2">
+2220:                 <label class="ml-1 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+                       ^
+2221:                   >Pilih Periode Belajar</label
+2222:                 >
+13.36.51 [vite-plugin-svelte] src/routes/admin/dashboard/+page.svelte:2240:8 A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control
+2238:             <div class="space-y-5">
+2239:               <div class="flex flex-col gap-2">
+2240:                 <label class="ml-1 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+                       ^
+2241:                   >Nama Mata Pelajaran</label
+2242:                 >
+13.36.51 [vite-plugin-svelte] src/routes/admin/dashboard/+page.svelte:2254:8 A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control
+2252:             <div class="space-y-5">
+2253:               <div class="flex flex-col gap-2">
+2254:                 <label class="ml-1 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+                       ^
+2255:                   >Nama pengguna</label
+2256:                 >
+13.36.51 [vite-plugin-svelte] src/routes/admin/dashboard/+page.svelte:2265:8 A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control
+2263:               </div>
+2264:               <div class="flex flex-col gap-2">
+2265:                 <label class="ml-1 text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                              ^
+2266:                   {isEditing ? 'Kata sandi baru (kosongkan jika tidak diubah)' : 'Kata sandi awal'}
+2267:                 </label>
+13.36.51 [vite-plugin-svelte] src/routes/admin/dashboard/+page.svelte:2307:6 A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control
+2305:         <form onsubmit={handleAddPeriod} class="space-y-5">
+2306:           <div class="flex flex-col gap-2">
+2307:             <label class="ml-1 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+                   ^
+2308:               >Tahun Ajar</label
+2309:             >
+13.36.51 [vite-plugin-svelte] src/routes/admin/dashboard/+page.svelte:2319:6 A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control
+2317:           </div>
+2318:           <div class="flex flex-col gap-2">
+2319:             <label class="ml-1 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+                   ^
+2320:               >Semester</label
+2321:             >
+13.36.51 [vite-plugin-svelte] src/routes/admin/dashboard/+page.svelte:2331:6 A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control
+2329:           </div>
+2330:           <div class="flex flex-col gap-2">
+2331:             <label class="ml-1 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+                   ^
+2332:               >Status</label
+2333:             >
+13.36.51 [vite-plugin-svelte] src/routes/admin/dashboard/+page.svelte:2383:6 A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control
+2381:           </div>
+2382:           <div class="flex flex-col gap-2">
+2383:             <label class="ml-1 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+                   ^
+2384:               >Pilih Aksi</label
+2385:             >
+13.36.51 [vite-plugin-svelte] src/routes/admin/dashboard/+page.svelte:2398:7 A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control
+2396:           {#if assignData.action === 'update'}
+2397:             <div class="flex flex-col gap-2">
+2398:               <label class="ml-1 text-[10px] font-black tracking-widest text-amber-500 uppercase"
+                     ^
+2399:                 >Kelas Asal (Yang Ingin Ditinggalkan)</label
+2400:               >
+13.36.51 [vite-plugin-svelte] src/routes/admin/dashboard/+page.svelte:2417:6 A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control
+2415:           {/if}
+2416:           <div class="flex flex-col gap-2">
+2417:             <label class="ml-1 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+                   ^
+2418:               >{assignData.action === 'update' ? 'Kelas Tujuan (Baru)' : 'Pilih Kelas'}</label
+2419:             >
+13.36.51 [vite-plugin-svelte] src/routes/admin/dashboard/+page.svelte:2517:6 A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control
+2515:         <form onsubmit={handleAssignGuru} class="space-y-4 border-t border-slate-100 pt-4">
+2516:           <div class="flex flex-col gap-2">
+2517:             <label class="ml-1 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+                   ^
+2518:               >Tambah Tanggung Jawab Kelas</label
+2519:             >
+13.36.51 [vite-plugin-svelte] src/routes/admin/dashboard/+page.svelte:2583:6 A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control
+2581:         <form onsubmit={handleResetPassword} class="space-y-5">
+2582:           <div class="flex flex-col gap-2">
+2583:             <label class="ml-1 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+                   ^
+2584:               >Nama pengguna / asal sekolah</label
+2585:             >
+13.36.51 [vite-plugin-svelte] src/routes/admin/dashboard/+page.svelte:2600:6 A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control
+2598:           </div>
+2599:           <div class="flex flex-col gap-2">
+2600:             <label class="ml-1 text-[10px] font-black tracking-widest text-amber-500 uppercase"
+                   ^
+2601:               >Jawaban Keamanan</label
+2602:             >
+13.36.51 [vite-plugin-svelte] src/routes/admin/dashboard/+page.svelte:2611:6 A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control
+2609:           </div>
+2610:           <div class="flex flex-col gap-2 pt-2">
+2611:             <label class="ml-1 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+                   ^
+2612:               >Kata sandi baru</label
+2613:             >
+13.36.51 [vite-plugin-svelte] src/routes/admin/dashboard/+page.svelte:2622:6 A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control
+2620:           </div>
+2621:           <div class="flex flex-col gap-2">
+2622:             <label class="ml-1 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+                   ^
+2623:               >Konfirmasi kata sandi</label
+2624:             >
+13.36.51 [vite-plugin-svelte] src/routes/admin/dashboard/+page.svelte:2666:5 Buttons and links should either contain text or have an `aria-label`, `aria-labelledby` or `title` attribute
+https://svelte.dev/e/a11y_consider_explicit_label
+2664:             </p>
+2665:           </div>
+2666:           <button
+                       ^
+2667:             type="button"
+2668:             onclick={() => {
+13.36.51 [vite-plugin-svelte] src/routes/admin/dashboard/+page.svelte:2774:5 Buttons and links should either contain text or have an `aria-label`, `aria-labelledby` or `title` attribute
+https://svelte.dev/e/a11y_consider_explicit_label
+2772:             </p>
+2773:           </div>
+2774:           <button
+                       ^
+2775:             onclick={() => (showImportModal = false)}
+2776:             class="rounded-full bg-slate-100 p-2 text-slate-400 hover:text-red-500"
+✓ 158 modules transformed.
+rendering chunks...
+vite v8.0.7 building client environment for production...
+[2Ktransforming...13.36.53 [vite-plugin-svelte] src/routes/login/teacher/+page.svelte:268:6 A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control
+266:         <form onsubmit={handleForgotPassword} class="space-y-4 text-left">
+267:           <div class="flex flex-col gap-2">
+268:             <label class="ml-1 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+                  ^
+269:               >Nama pengguna</label
+270:             >
+13.36.53 [vite-plugin-svelte] src/routes/teacher/students/+page.svelte:514:5 Buttons and links should either contain text or have an `aria-label`, `aria-labelledby` or `title` attribute
+https://svelte.dev/e/a11y_consider_explicit_label
+512:         <div class="mb-6 flex items-center justify-between">
+513:           <h3 class="text-xl font-black tracking-tight text-slate-900 uppercase">Tambahkan siswa ke kelas</h3>
+514:           <button
+                      ^
+515:             onclick={() => (showAddModal = false)}
+516:             class="rounded-full bg-slate-100 p-2 text-slate-400 hover:text-red-500"
+13.36.53 [vite-plugin-svelte] src/routes/reset-password/+page.svelte:206:1 Unused CSS selector ".scale-in-center"
+https://svelte.dev/e/css_unused_selector
+204: 
+205: <style>
+206:   .scale-in-center {
+                       ^
+207:     animation: scale-in-center 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+208:   }
+13.36.54 [vite-plugin-svelte] src/routes/admin/dashboard/+page.svelte:1664:10 Buttons and links should either contain text or have an `aria-label`, `aria-labelledby` or `title` attribute
+https://svelte.dev/e/a11y_consider_explicit_label
+1662:                       {/if}
+1663:                     </button>
+1664:                     <button
+                                 ^
+1665:                       onclick={() => deletePeriod(period.id)}
+1666:                       class="p-2 text-red-400 transition-colors hover:text-red-600"
+13.36.54 [vite-plugin-svelte] src/routes/admin/dashboard/+page.svelte:2113:9 A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control
+2111:               <div class="space-y-5">
+2112:                 <div class="flex flex-col gap-2">
+2113:                   <label
+                         ^
+2114:                     class="ml-1 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+2115:                     >Nama Lengkap</label
+13.36.54 [vite-plugin-svelte] src/routes/admin/dashboard/+page.svelte:2125:9 A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control
+2123:                 </div>
+2124:                 <div class="flex flex-col gap-2">
+2125:                   <label
+                         ^
+2126:                     class="ml-1 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+2127:                     >Nama pengguna</label
+13.36.54 [vite-plugin-svelte] src/routes/admin/dashboard/+page.svelte:2137:9 A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control
+2135:                 </div>
+2136:                 <div class="flex flex-col gap-2">
+2137:                   <label
+                         ^
+2138:                     class="ml-1 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+2139:                     >{activeMenu === 'guru' ? 'NIP (Opsional)' : 'Asal Sekolah'}</label
+13.36.54 [vite-plugin-svelte] src/routes/admin/dashboard/+page.svelte:2152:10 A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control
+2150:                 {#if !isEditing}
+2151:                   <div class="flex flex-col gap-2">
+2152:                     <label
+                           ^
+2153:                       class="ml-1 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+2154:                       >Kata sandi awal</label
+13.36.54 [vite-plugin-svelte] src/routes/admin/dashboard/+page.svelte:2167:11 A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control
+2165:                   {#if !isEditing}
+2166:                     <div class="flex flex-col gap-2">
+2167:                       <label
+                             ^
+2168:                         class="ml-1 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+2169:                         >Label petunjuk keamanan</label
+13.36.54 [vite-plugin-svelte] src/routes/admin/dashboard/+page.svelte:2179:11 A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control
+2177:                     </div>
+2178:                     <div class="flex flex-col gap-2">
+2179:                       <label
+                             ^
+2180:                         class="ml-1 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+2181:                         >Jawaban Keamanan</label
+13.36.54 [vite-plugin-svelte] src/routes/admin/dashboard/+page.svelte:2193:10 A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control
+2191:                 {:else}
+2192:                   <div class="flex flex-col gap-2">
+2193:                     <label
+                           ^
+2194:                       class="ml-1 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+2195:                       >Alamat email</label
+13.36.54 [vite-plugin-svelte] src/routes/admin/dashboard/+page.svelte:2209:8 A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control
+2207:             <div class="space-y-5">
+2208:               <div class="flex flex-col gap-2">
+2209:                 <label class="ml-1 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+                       ^
+2210:                   >Nama Kelas</label
+2211:                 >
+13.36.54 [vite-plugin-svelte] src/routes/admin/dashboard/+page.svelte:2220:8 A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control
+2218:               </div>
+2219:               <div class="flex flex-col gap-2">
+2220:                 <label class="ml-1 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+                       ^
+2221:                   >Pilih Periode Belajar</label
+2222:                 >
+13.36.54 [vite-plugin-svelte] src/routes/admin/dashboard/+page.svelte:2240:8 A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control
+2238:             <div class="space-y-5">
+2239:               <div class="flex flex-col gap-2">
+2240:                 <label class="ml-1 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+                       ^
+2241:                   >Nama Mata Pelajaran</label
+2242:                 >
+13.36.54 [vite-plugin-svelte] src/routes/admin/dashboard/+page.svelte:2254:8 A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control
+2252:             <div class="space-y-5">
+2253:               <div class="flex flex-col gap-2">
+2254:                 <label class="ml-1 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+                       ^
+2255:                   >Nama pengguna</label
+2256:                 >
+13.36.54 [vite-plugin-svelte] src/routes/admin/dashboard/+page.svelte:2265:8 A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control
+2263:               </div>
+2264:               <div class="flex flex-col gap-2">
+2265:                 <label class="ml-1 text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                              ^
+2266:                   {isEditing ? 'Kata sandi baru (kosongkan jika tidak diubah)' : 'Kata sandi awal'}
+2267:                 </label>
+13.36.54 [vite-plugin-svelte] src/routes/admin/dashboard/+page.svelte:2307:6 A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control
+2305:         <form onsubmit={handleAddPeriod} class="space-y-5">
+2306:           <div class="flex flex-col gap-2">
+2307:             <label class="ml-1 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+                   ^
+2308:               >Tahun Ajar</label
+2309:             >
+13.36.54 [vite-plugin-svelte] src/routes/admin/dashboard/+page.svelte:2319:6 A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control
+2317:           </div>
+2318:           <div class="flex flex-col gap-2">
+2319:             <label class="ml-1 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+                   ^
+2320:               >Semester</label
+2321:             >
+13.36.54 [vite-plugin-svelte] src/routes/admin/dashboard/+page.svelte:2331:6 A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control
+2329:           </div>
+2330:           <div class="flex flex-col gap-2">
+2331:             <label class="ml-1 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+                   ^
+2332:               >Status</label
+2333:             >
+13.36.54 [vite-plugin-svelte] src/routes/admin/dashboard/+page.svelte:2383:6 A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control
+2381:           </div>
+2382:           <div class="flex flex-col gap-2">
+2383:             <label class="ml-1 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+                   ^
+2384:               >Pilih Aksi</label
+2385:             >
+13.36.54 [vite-plugin-svelte] src/routes/admin/dashboard/+page.svelte:2398:7 A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control
+2396:           {#if assignData.action === 'update'}
+2397:             <div class="flex flex-col gap-2">
+2398:               <label class="ml-1 text-[10px] font-black tracking-widest text-amber-500 uppercase"
+                     ^
+2399:                 >Kelas Asal (Yang Ingin Ditinggalkan)</label
+2400:               >
+13.36.54 [vite-plugin-svelte] src/routes/admin/dashboard/+page.svelte:2417:6 A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control
+2415:           {/if}
+2416:           <div class="flex flex-col gap-2">
+2417:             <label class="ml-1 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+                   ^
+2418:               >{assignData.action === 'update' ? 'Kelas Tujuan (Baru)' : 'Pilih Kelas'}</label
+2419:             >
+13.36.54 [vite-plugin-svelte] src/routes/admin/dashboard/+page.svelte:2517:6 A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control
+2515:         <form onsubmit={handleAssignGuru} class="space-y-4 border-t border-slate-100 pt-4">
+2516:           <div class="flex flex-col gap-2">
+2517:             <label class="ml-1 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+                   ^
+2518:               >Tambah Tanggung Jawab Kelas</label
+2519:             >
+13.36.54 [vite-plugin-svelte] src/routes/admin/dashboard/+page.svelte:2583:6 A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control
+2581:         <form onsubmit={handleResetPassword} class="space-y-5">
+2582:           <div class="flex flex-col gap-2">
+2583:             <label class="ml-1 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+                   ^
+2584:               >Nama pengguna / asal sekolah</label
+2585:             >
+13.36.54 [vite-plugin-svelte] src/routes/admin/dashboard/+page.svelte:2600:6 A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control
+2598:           </div>
+2599:           <div class="flex flex-col gap-2">
+2600:             <label class="ml-1 text-[10px] font-black tracking-widest text-amber-500 uppercase"
+                   ^
+2601:               >Jawaban Keamanan</label
+2602:             >
+13.36.54 [vite-plugin-svelte] src/routes/admin/dashboard/+page.svelte:2611:6 A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control
+2609:           </div>
+2610:           <div class="flex flex-col gap-2 pt-2">
+2611:             <label class="ml-1 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+                   ^
+2612:               >Kata sandi baru</label
+2613:             >
+13.36.54 [vite-plugin-svelte] src/routes/admin/dashboard/+page.svelte:2622:6 A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control
+2620:           </div>
+2621:           <div class="flex flex-col gap-2">
+2622:             <label class="ml-1 text-[10px] font-black tracking-widest text-slate-400 uppercase"
+                   ^
+2623:               >Konfirmasi kata sandi</label
+2624:             >
+13.36.54 [vite-plugin-svelte] src/routes/admin/dashboard/+page.svelte:2666:5 Buttons and links should either contain text or have an `aria-label`, `aria-labelledby` or `title` attribute
+https://svelte.dev/e/a11y_consider_explicit_label
+2664:             </p>
+2665:           </div>
+2666:           <button
+                       ^
+2667:             type="button"
+2668:             onclick={() => {
+13.36.54 [vite-plugin-svelte] src/routes/admin/dashboard/+page.svelte:2774:5 Buttons and links should either contain text or have an `aria-label`, `aria-labelledby` or `title` attribute
+https://svelte.dev/e/a11y_consider_explicit_label
+2772:             </p>
+2773:           </div>
+2774:           <button
+                       ^
+2775:             onclick={() => (showImportModal = false)}
+2776:             class="rounded-full bg-slate-100 p-2 text-slate-400 hover:text-red-500"
+✓ 230 modules transformed.
+rendering chunks...
+computing gzip size...
+.svelte-kit/output/client/_app/version.json                         0.02 kB │ gzip:   0.04 kB
+.svelte-kit/output/client/.vite/manifest.json                       6.81 kB │ gzip:   0.91 kB
+.svelte-kit/output/client/_app/immutable/assets/2.DTTpy8M6.css      0.06 kB │ gzip:   0.07 kB
+.svelte-kit/output/client/_app/immutable/assets/8.WrpE72BF.css      0.10 kB │ gzip:   0.10 kB
+.svelte-kit/output/client/_app/immutable/assets/6.5u0x2Voc.css      0.22 kB │ gzip:   0.15 kB
+.svelte-kit/output/client/_app/immutable/assets/9.DytADXeY.css      0.32 kB │ gzip:   0.19 kB
+.svelte-kit/output/client/_app/immutable/assets/0.Ckc_L0pr.css     51.08 kB │ gzip:   9.59 kB
+.svelte-kit/output/client/_app/immutable/chunks/BimjJFyh.js         0.02 kB │ gzip:   0.04 kB
+.svelte-kit/output/client/_app/immutable/chunks/CP97kCR3.js         0.06 kB │ gzip:   0.08 kB
+.svelte-kit/output/client/_app/immutable/entry/start.CuZGK8Nb.js    0.08 kB │ gzip:   0.09 kB
+.svelte-kit/output/client/_app/immutable/chunks/CTzzpmrh.js         0.68 kB │ gzip:   0.41 kB
+.svelte-kit/output/client/_app/immutable/nodes/1.CZH0f_n6.js        1.06 kB │ gzip:   0.50 kB
+.svelte-kit/output/client/_app/immutable/chunks/O6-aNYLC.js         1.20 kB │ gzip:   0.68 kB
+.svelte-kit/output/client/_app/immutable/nodes/0.0g_SGCR7.js        2.40 kB │ gzip:   0.99 kB
+.svelte-kit/output/client/_app/immutable/nodes/2.XwUBS99Q.js        3.38 kB │ gzip:   1.49 kB
+.svelte-kit/output/client/_app/immutable/entry/app.B7WaJ-ad.js      4.19 kB │ gzip:   1.63 kB
+.svelte-kit/output/client/_app/immutable/nodes/4.DmdG-bGM.js        4.59 kB │ gzip:   2.03 kB
+.svelte-kit/output/client/_app/immutable/nodes/5.BMfiZUR9.js        5.39 kB │ gzip:   2.29 kB
+.svelte-kit/output/client/_app/immutable/nodes/8.HrDhHNgF.js        5.77 kB │ gzip:   2.41 kB
+.svelte-kit/output/client/_app/immutable/nodes/7.CCmQdIpO.js        6.10 kB │ gzip:   2.15 kB
+.svelte-kit/output/client/_app/immutable/nodes/9.CWifzs6I.js        8.09 kB │ gzip:   3.09 kB
+.svelte-kit/output/client/_app/immutable/nodes/6.CmL2hpv7.js        8.63 kB │ gzip:   2.86 kB
+.svelte-kit/output/client/_app/immutable/nodes/11.CBd6lnWA.js      15.61 kB │ gzip:   5.06 kB
+.svelte-kit/output/client/_app/immutable/nodes/10.C8OW3idW.js      18.18 kB │ gzip:   5.89 kB
+.svelte-kit/output/client/_app/immutable/chunks/BLT98Jbo.js        23.45 kB │ gzip:   8.84 kB
+.svelte-kit/output/client/_app/immutable/chunks/fMmgH7Rd.js        25.85 kB │ gzip:  10.07 kB
+.svelte-kit/output/client/_app/immutable/chunks/BfZuU0tC.js        46.11 kB │ gzip:  17.73 kB
+.svelte-kit/output/client/_app/immutable/nodes/3.DTR8Bpzz.js       78.69 kB │ gzip:  15.09 kB
+.svelte-kit/output/client/_app/immutable/chunks/Bs9terz2.js       368.82 kB │ gzip: 108.08 kB
+
+✓ built in 1.59s
+computing gzip size...
+.svelte-kit/output/server/.vite/manifest.json                                6.31 kB │ gzip:  0.81 kB
+.svelte-kit/output/server/_app/immutable/assets/_page.CZbjoJnA.css           0.05 kB │ gzip:  0.07 kB
+.svelte-kit/output/server/_app/immutable/assets/_page.WrpE72BF.css           0.10 kB │ gzip:  0.10 kB
+.svelte-kit/output/server/_app/immutable/assets/_page.5u0x2Voc.css           0.22 kB │ gzip:  0.15 kB
+.svelte-kit/output/server/_app/immutable/assets/_page.DytADXeY.css           0.32 kB │ gzip:  0.19 kB
+.svelte-kit/output/server/_app/immutable/assets/_layout.BaGsxnRK.css        50.36 kB │ gzip:  9.55 kB
+.svelte-kit/output/server/chunks/navigation.js                               0.03 kB │ gzip:  0.05 kB
+.svelte-kit/output/server/internal.js                                        0.40 kB │ gzip:  0.20 kB
+.svelte-kit/output/server/chunks/environment.js                              1.31 kB │ gzip:  0.56 kB
+.svelte-kit/output/server/entries/pages/reset-password/_page.svelte.js       1.53 kB │ gzip:  0.73 kB
+.svelte-kit/output/server/entries/pages/_layout.svelte.js                    2.58 kB │ gzip:  1.04 kB
+.svelte-kit/output/server/entries/pages/_page.svelte.js                      3.11 kB │ gzip:  1.23 kB
+.svelte-kit/output/server/entries/pages/login/admin/_page.svelte.js          3.12 kB │ gzip:  1.18 kB
+.svelte-kit/output/server/entries/pages/login/student/_page.svelte.js        3.39 kB │ gzip:  1.27 kB
+.svelte-kit/output/server/entries/fallbacks/error.svelte.js                  3.48 kB │ gzip:  1.32 kB
+.svelte-kit/output/server/entries/pages/login/teacher/_page.svelte.js        4.01 kB │ gzip:  1.32 kB
+.svelte-kit/output/server/entries/pages/register/siswa/_page.svelte.js       4.42 kB │ gzip:  1.19 kB
+.svelte-kit/output/server/chunks/index-server.js                             4.58 kB │ gzip:  1.69 kB
+.svelte-kit/output/server/entries/pages/student/scanner/_page.svelte.js      5.86 kB │ gzip:  1.81 kB
+.svelte-kit/output/server/entries/pages/teacher/students/_page.svelte.js     8.55 kB │ gzip:  2.49 kB
+.svelte-kit/output/server/chunks/shared.js                                  10.20 kB │ gzip:  3.33 kB
+.svelte-kit/output/server/entries/pages/teacher/dashboard/_page.svelte.js   10.83 kB │ gzip:  2.88 kB
+.svelte-kit/output/server/chunks/exports.js                                 11.24 kB │ gzip:  3.51 kB
+.svelte-kit/output/server/chunks/internal.js                                20.22 kB │ gzip:  6.24 kB
+.svelte-kit/output/server/chunks/utils.js                                   28.81 kB │ gzip:  8.36 kB
+.svelte-kit/output/server/entries/pages/admin/dashboard/_page.svelte.js     33.82 kB │ gzip:  5.23 kB
+.svelte-kit/output/server/remote-entry.js                                   35.25 kB │ gzip:  7.97 kB
+.svelte-kit/output/server/chunks/client.js                                  45.76 kB │ gzip: 13.57 kB
+.svelte-kit/output/server/index.js                                         119.49 kB │ gzip: 30.48 kB
+.svelte-kit/output/server/chunks/dev.js                                    123.76 kB │ gzip: 32.15 kB
+
+[33m[PLUGIN_TIMINGS] Warning:[0m Your build spent significant time in plugins. Here is a breakdown:
+  - vite-plugin-sveltekit-guard (84%)
+  - vite-plugin-svelte:compile (6%)
+  - vite-plugin-sveltekit-virtual-modules (4%)
+See https://rolldown.rs/options/checks#plugintimings for more details.
+
+✓ built in 5.01s
+
+Run npm run preview to preview your production build locally.
+
+> Using @sveltejs/adapter-static
+  @sveltejs/adapter-static: all routes must be fully prerenderable, but found the following routes that are dynamic:
+    - src/routes/
+    - src/routes/admin/dashboard
+    - src/routes/login/admin
+    - src/routes/login/student
+    - src/routes/login/teacher
+    - src/routes/register/siswa
+    - src/routes/reset-password
+    - src/routes/student/scanner
+    - src/routes/teacher/dashboard
+    - src/routes/teacher/students
+  
+  You have the following options:
+    - set the `fallback` option — see https://svelte.dev/docs/kit/single-page-apps#usage for more info.
+    - add `export const prerender = true` to your root `+layout.js/.ts` or `+layout.server.js/.ts` file. This will try to prerender all pages.
+    - add `export const prerender = true` to any `+server.js/ts` files that are not fetched by page `load` functions.
+  
+    - pass `strict: false` to `adapter-static` to ignore this error. Only do this if you are sure you don't need the routes in question in your final app, as they will be unavailable. See https://github.com/sveltejs/kit/tree/main/packages/adapter-static#strict for more info.
+  
+  If this doesn't help, you may need to use a different adapter. @sveltejs/adapter-static can only be used for sites that don't need a server for dynamic rendering, and can run on just a static file server.
+  See https://svelte.dev/docs/kit/page-options#prerender for more details
+error during build:
+Error: Encountered dynamic routes
+    at adapt (file:///home/hafizh/Coding/web/UAS_PEMWEB_APS_RPL/frontend/node_modules/@sveltejs/adapter-static/index.js:38:12)
+    at adapt (file:///home/hafizh/Coding/web/UAS_PEMWEB_APS_RPL/frontend/node_modules/@sveltejs/kit/src/core/adapt/index.js:41:8)
+    at finalise (file:///home/hafizh/Coding/web/UAS_PEMWEB_APS_RPL/frontend/node_modules/@sveltejs/kit/src/exports/vite/index.js:1381:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async PluginContextImpl.handler (file:///home/hafizh/Coding/web/UAS_PEMWEB_APS_RPL/frontend/node_modules/@sveltejs/kit/src/exports/vite/index.js:1412:5)
+    at async plugin (file:///home/hafizh/Coding/web/UAS_PEMWEB_APS_RPL/frontend/node_modules/rolldown/dist/shared/bindingify-input-options-4E8MEYg4.mjs:1390:4)
+    at async plugin.<computed> (file:///home/hafizh/Coding/web/UAS_PEMWEB_APS_RPL/frontend/node_modules/rolldown/dist/shared/bindingify-input-options-4E8MEYg4.mjs:1636:12) {
+  code: 'PLUGIN_ERROR',
+  plugin: 'vite-plugin-sveltekit-compile',
+  hook: 'closeBundle'
+}

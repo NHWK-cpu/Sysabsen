@@ -54,7 +54,7 @@
 			<div>
 				<h1 class="text-xl font-black tracking-tighter text-slate-800">ABSENSI</h1>
 				<p class="text-[10px] leading-none font-bold tracking-widest text-slate-400 uppercase">
-					Smart Learning Center
+					Pusat pembelajaran digital
 				</p>
 			</div>
 		</div>
@@ -64,14 +64,14 @@
 				href="/login/teacher"
 				class="rounded-xl px-5 py-2.5 text-sm font-bold text-slate-600 transition-all hover:bg-slate-50 hover:text-brand-blue"
 			>
-				Login Guru
+				Masuk guru
 			</a>
 			<div class="h-6 w-[1px] bg-slate-100"></div>
 			<a
 				href="/login/admin"
 				class="rounded-xl px-5 py-2.5 text-sm font-bold text-slate-600 transition-all hover:bg-slate-50 hover:text-slate-900"
 			>
-				Login Admin
+				Masuk admin
 			</a>
 		</nav>
 
@@ -110,7 +110,7 @@
 	</div>
 
 	<footer class="fixed bottom-8 text-[10px] font-bold tracking-[0.3em] text-slate-300 uppercase">
-		&copy; 2026 SLC System • Production Environment
+		&copy; 2026 sistem absensi • lingkungan produksi
 	</footer>
 </div>
 

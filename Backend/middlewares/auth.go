@@ -124,3 +124,19 @@ func GuruOnly(next http.HandlerFunc) http.HandlerFunc {
 		next.ServeHTTP(w, r)
 	}
 }
+
+// AdminOrGuru adalah satpam yang mengizinkan Admin atau Guru masuk
+func AdminOrGuru(next http.HandlerFunc) http.HandlerFunc {
+    return func(w http.ResponseWriter, r *http.Request) {
+        userInfo := r.Context().Value("userInfo").(jwt.MapClaims)
+        role := userInfo["role"].(string)
+
+        if role != "admin" && role != "super_admin" && role != "guru" {
+            w.Header().Set("Content-Type", "application/json")
+            w.WriteHeader(http.StatusForbidden)
+            w.Write([]byte(`{"error": "Akses ditolak. Fitur ini khusus Admin dan Guru Wali!"}`))
+            return
+        }
+        next.ServeHTTP(w, r)
+    }
+}

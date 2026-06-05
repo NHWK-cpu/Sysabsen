@@ -47,13 +47,32 @@ func CatatAbsen(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// 4. Ekstrak sesi_id dari dalam QR
-	qrClaims, ok := qrToken.Claims.(jwt.MapClaims)
-	if !ok || qrClaims["tipe"] != "qr_absen" {
-		http.Error(w, `{"error": "Jenis QR Code salah!"}`, http.StatusBadRequest)
-		return
-	}
-	
-	sesiID := qrClaims["sesi_id"].(string)
+    qrClaims, ok := qrToken.Claims.(jwt.MapClaims)
+    if !ok || qrClaims["tipe"] != "qr_absen" {
+        http.Error(w, `{"error": "Jenis QR Code salah!"}`, http.StatusBadRequest)
+        return
+    }
+    
+    sesiID := qrClaims["sesi_id"].(string)
+
+    // ==========================================
+    // [TAMBAHAN BARU DI SINI]: Validasi Lintas Kelas
+    // ==========================================
+    var kelasID int
+    errSesi := config.DB.QueryRow("SELECT kelas_id FROM sesi_pembelajaran WHERE id = ?", sesiID).Scan(&kelasID)
+    if errSesi != nil {
+        http.Error(w, `{"error": "Sesi pembelajaran tidak ditemukan atau sudah tidak valid."}`, http.StatusNotFound)
+        return
+    }
+
+    var isTerdaftar int
+    errCek := config.DB.QueryRow("SELECT COUNT(*) FROM siswa_kelas WHERE siswa_id = ? AND kelas_id = ?", siswaID, kelasID).Scan(&isTerdaftar)
+
+    if errCek != nil || isTerdaftar == 0 {
+        http.Error(w, `{"error": "Akses ditolak: Anda terdeteksi tidak terdaftar di kelas ini!"}`, http.StatusForbidden)
+        return
+    }
+    // ==========================================
 
 	// 5. Validasi Status Hadir
 	if req.StatusKehadiran != "Hadir" && req.StatusKehadiran != "Izin" && req.StatusKehadiran != "Sakit" {

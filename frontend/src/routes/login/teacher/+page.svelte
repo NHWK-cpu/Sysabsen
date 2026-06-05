@@ -35,9 +35,9 @@
 				const errorText = await res.text();
 				try {
 					const errJson = JSON.parse(errorText);
-					errorMessage = errJson.error || 'Login gagal.';
+					errorMessage = errJson.error || 'Gagal masuk.';
 				} catch {
-					errorMessage = errorText || 'Username atau password salah.';
+					errorMessage = errorText || 'Nama pengguna atau kata sandi salah.';
 				}
 				isLoading = false;
 				return;
@@ -130,7 +130,7 @@
 					/><path d="M8 11h8" /></svg
 				>
 			</div>
-			<h1 class="text-2xl font-black tracking-tight text-slate-800 uppercase">Login Teacher</h1>
+			<h1 class="text-2xl font-black tracking-tight text-slate-800 uppercase">Masuk guru</h1>
 			<p class="text-sm font-medium text-slate-400">Masuk untuk mengelola absensi kelas</p>
 		</div>
 
@@ -146,13 +146,13 @@
 			<div class="flex flex-col gap-2">
 				<label
 					for="username"
-					class="ml-1 text-xs font-black tracking-wider text-slate-500 uppercase">Username</label
+					class="ml-1 text-xs font-black tracking-wider text-slate-500 uppercase">Nama pengguna</label
 				>
 				<input
 					type="text"
 					id="username"
 					bind:value={username}
-					placeholder="Masukkan Username"
+					placeholder="Nama pengguna"
 					class="w-full rounded-2xl border-2 border-slate-100 bg-slate-50 px-5 py-4 font-medium transition-all outline-none focus:border-brand-blue focus:bg-white"
 					required
 				/>
@@ -161,7 +161,7 @@
 			<div class="flex flex-col gap-2">
 				<div class="flex items-center justify-between px-1">
 					<label for="password" class="text-xs font-black tracking-wider text-slate-500 uppercase"
-						>Password</label
+						>Kata sandi</label
 					>
 					<button
 						type="button"
@@ -226,7 +226,7 @@
 						class="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"
 					></span>
 				{:else}
-					Sign In as Teacher
+					Masuk sebagai guru
 				{/if}
 			</button>
 		</form>
@@ -240,10 +240,10 @@
 				class="scale-in-center w-full max-w-sm rounded-[2.5rem] bg-white p-8 text-center shadow-2xl"
 			>
 				<h3 class="mb-2 text-xl font-black tracking-tight text-slate-900 uppercase">
-					Lupa Password?
+					Lupa kata sandi?
 				</h3>
 				<p class="mb-6 text-xs leading-relaxed font-medium text-slate-500">
-					Masukkan Username Anda. Kami akan mengirimkan tautan pemulihan ke alamat email yang
+					Masukkan nama pengguna Anda. Kami akan mengirim tautan pemulihan ke alamat email yang
 					terhubung dengan akun tersebut.
 				</p>
 
@@ -266,12 +266,12 @@
 				<form onsubmit={handleForgotPassword} class="space-y-4 text-left">
 					<div class="flex flex-col gap-2">
 						<label class="ml-1 text-[10px] font-black tracking-widest text-slate-400 uppercase"
-							>Username</label
+							>Nama pengguna</label
 						>
 						<input
 							type="text"
 							bind:value={forgotUsername}
-							placeholder="Masukkan Username"
+							placeholder="Nama pengguna"
 							class="w-full rounded-2xl border-2 border-slate-100 bg-slate-50 px-5 py-4 font-medium transition-all outline-none focus:border-brand-blue focus:bg-white"
 							required
 						/>
@@ -299,7 +299,7 @@
 									class="inline-block h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent"
 								></span>
 							{:else}
-								Kirim Link
+								Kirim tautan
 							{/if}
 						</button>
 					</div>

@@ -50,9 +50,9 @@
 				} else {
 					try {
 						const errJson = JSON.parse(errorText);
-						errorMessage = errJson.error || 'Login gagal.';
+						errorMessage = errJson.error || 'Gagal masuk.';
 					} catch {
-						errorMessage = errorText || 'Username atau password salah.';
+						errorMessage = errorText || 'Nama pengguna atau kata sandi salah.';
 					}
 				}
 				isLoading = false;
@@ -95,7 +95,7 @@
 					/></svg
 				>
 			</div>
-			<h1 class="text-2xl font-black tracking-tight text-slate-800 uppercase">Login Student</h1>
+			<h1 class="text-2xl font-black tracking-tight text-slate-800 uppercase">Masuk siswa</h1>
 			<p class="text-sm font-medium text-slate-400">Masuk untuk melakukan absensi</p>
 		</div>
 
@@ -115,17 +115,22 @@
 			</div>
 		{/if}
 
+		<p class="mb-6 text-center text-sm font-medium text-slate-500">
+			Belum punya akun?
+			<a href="/register/siswa" class="font-black text-brand-blue hover:underline">Daftar siswa</a>
+		</p>
+
 		<form onsubmit={handleSubmit} class="space-y-6">
 			<div class="flex flex-col gap-2">
 				<label
 					for="username"
-					class="ml-1 text-xs font-black tracking-wider text-slate-500 uppercase">Username</label
+					class="ml-1 text-xs font-black tracking-wider text-slate-500 uppercase">Nama pengguna</label
 				>
 				<input
 					type="text"
 					id="username"
 					bind:value={username}
-					placeholder="Masukkan username"
+					placeholder="Nama pengguna"
 					class="w-full rounded-2xl border-2 border-slate-100 bg-slate-50 px-5 py-4 font-medium transition-all outline-none focus:border-brand-blue focus:bg-white"
 					required
 				/>
@@ -134,9 +139,8 @@
 			<div class="flex flex-col gap-2">
 				<div class="flex items-center justify-between px-1">
 					<label for="password" class="text-xs font-black tracking-wider text-slate-500 uppercase"
-						>Password</label
+						>Kata sandi</label
 					>
-					<a href="/" class="text-xs font-extrabold text-brand-blue hover:text-blue-700">Lupa?</a>
 				</div>
 				<div class="relative">
 					<input
@@ -197,13 +201,13 @@
 						class="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"
 					></span>
 				{:else}
-					Sign In
+					Masuk
 				{/if}
 			</button>
 		</form>
 
 		<div class="mt-8 text-center">
-			<p class="text-xs font-medium text-slate-400">© 2026 Smart Attendance System</p>
+			<p class="text-xs font-medium text-slate-400">© 2026 sistem absensi sekolah</p>
 		</div>
 	</div>
 </div>

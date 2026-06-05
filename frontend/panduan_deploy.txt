@@ -1,0 +1,89 @@
+PANDUAN DEPLOY PROJECT SVELTEKIT KE VERCEL
+--------------------------------------------------------------------
+Ikuti setiap langkah secara berurutan.
+
+1. PRASYARAT
+   - Komputer dengan sistem operasi Windows, macOS, atau Linux.
+   - Koneksi internet.
+   - Akses ke terminal / command prompt.
+     * Windows: buka "Command Prompt" atau "PowerShell".
+     * macOS/Linux: buka "Terminal".
+
+2. INSTAL NODE.JS (Jika belum terinstal)
+   a. Kunjungi https://nodejs.org/
+   b. Download dan instal versi LTS (rekomendasi).
+   c. Saat instalasi, pastikan centang opsi "Add to PATH".
+   d. Setelah instalasi selesai, buka terminal baru dan ketik:
+        node --version
+        npm --version
+   Jika kedua perintah menampilkan nomor versi, Node.js dan npm siap digunakan.
+
+3. INSTAL VERCEL CLI
+   Di terminal, jalankan perintah berikut:
+        npm i -g vercel
+   Tunggu sampai proses instalasi selesai.
+   Untuk memverifikasi, ketik:
+        vercel --version
+   Harus menampilkan nomor versi Vercel CLI.
+
+4. LOGIN KE AKUN VERCEL
+   a. Jika Anda belum memiliki akun Vercel, daftar terlebih dahulu di https://vercel.com/signup (gunakan email atau akun GitHub/GitLab).
+   b. Di terminal, jalankan:
+        vercel login
+   c. Anda akan diminta membuka browser untuk login. Ikuti instruksi di layar.
+   d. Setelah login berhasil, terminal akan menampilkan pesan seperti "Logged in as [nama-akun]".
+
+5. SIAPKAN PROYEK LOKAL
+   a. Pastikan Anda berada di folder proyek frontend SvelteKit Anda.
+      Contoh: cd /path/to/frontend
+   b. Pastikan sudah ada file berikut:
+        - package.json
+        - svelte.config.js
+        - src/ (dan folder lain yang sesuai struktur SvelteKit)
+   c. Jalankan perintah instalasi dependensi (hanya perlu dilakukan sekali):
+        npm install
+   Tunggu hingga selesai (bisa membutuhkan beberapa menit).
+
+6. LINK PROYEK KE VERCEL (INITIAL SETUP)
+   Di terminal, jalankan:
+        vercel
+   Anda akan diminta beberapa pertanyaan:
+   - **Set up and deploy “[nama-proyek]”? [Y/n]** → ketik Y dan tekan Enter.
+   - **Which scope do you want to deploy to?** → pilih akun Vercel Anda (biasanya hanya satu pilihan) lalu tekan Enter.
+   - **Link to existing project? [y/N]** → ketik N (karena kita belum punya project di Vercel) lalu tekan Enter.
+   - **What’s your project name?** → ketik nama yang ingin Anda gunakan untuk URL (mis. uas-pemweb-frontend) lalu tekan Enter.
+   - **In which directory is your code located? ./** → biarkan default (titik) lalu tekan Enter.
+   - **Want to override the settings? [y/N]** → ketik N lalu tekan Enter.
+   Vercel akan mulai proses build dan deployment.
+   Tunggu hingga proses selesai (bisa membutuhkan 1-3 menit tergantung koneksi dan ukuran proyek).
+
+7. LIHAT HASIL DEPLOY
+   Setelah selesai, Vercel akan menampilkan URL seperti:
+        https://uas-pemweb-frontend.vercel.app
+   Buka URL tersebut di browser Anda. Aplikasi harus tampil seperti saat Anda menjalankan `npm run preview` secara lokal.
+
+8. PERUBAHAN KEDEPAN (UPDATE)
+   Setiap kali Anda mengubah kode dan ingin menerapkan perubahan:
+   a. Simpan perubahan Anda.
+   b. Di terminal, pastikan Anda masih berada di folder proyek.
+   c. Jalankan lagi:
+        vercel --prod
+      (Flag `--prod` memastikan deploy ke produksi; jika tidak diberikan, Vercel akan membuat preview deployment.)
+   d. Tunggu proses build dan deploy selesai.
+   e. Buka URL yang sama lagi untuk melihat perubahan.
+
+9. TROUBLESHOOTING DASAR
+   - **Perintah 'vercel' tidak ditemukan** → Pastikan Anda telah menjalankan `npm i -g vercel` dan terminal baru setelah instalasi.
+   - **Error saat npm install** → Periksa koneksi internet dan pastikan tidak ada file yang korup. Anda bisa menghapus folder `node_modules` dan file `package-lock.json` lalu jalankan `npm install` lagi.
+   - **Deployment gagal karena missing dependencies** → Pastikan Anda tidak secara tidak sengaja menambahkan file `.vercel` atau `vercel.json` yang salah. Biasanya tidak diperlukan untuk SvelteKit standar.
+   - **Situs tampil kosong atau error 404** → Buka log deployment di Vercel Dashboard (https://vercel.com/dashboard) → pilih project → pilih deployment terakhir → lihat "Logs" untuk pesan error.
+   - **Mau menggunakan domain khusus** → Di Vercel Dashboard, pilih project → Settings → Domains → tambahkan domain Anda dan ikuti panduan verifikasi.
+
+10. CATATAN AKHIR
+    - Anda tidak perlu membuat repository GitHub untuk menggunakan cara ini; Vercel CLI langsung mengirimkan kode dari komputer Anda.
+    - Pastikan Anda tidak menyimpan file sensitif (seperti .env dengan rahasia) di repositori jika Anda berencana membuatnya publik nanti. Untuk variabel lingkungan, Anda dapat menambahkannya di Vercel Dashboard → Settings → Environment Variables.
+    - Selalu jalankan `vercel --prod` ketika Anda yakin perubahan siap untuk produksi; tanpa flag, Vercel membuat deployment preview yang hanya dapat diakses dengan URL unik yang diberikan.
+
+--- SELESAI ---
+Semoga panduan ini membantu Anda mendeploy aplikasi SvelteKit ke Vercel dengan mudah.
+Jika masih ada kesulitan, ulangi langkah-langkah di atas.

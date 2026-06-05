@@ -28,9 +28,9 @@
 				const errorText = await res.text();
 				try {
 					const errJson = JSON.parse(errorText);
-					errorMessage = errJson.error || 'Login gagal.';
+					errorMessage = errJson.error || 'Gagal masuk.';
 				} catch {
-					errorMessage = errorText || 'Username atau password salah.';
+					errorMessage = errorText || 'Nama pengguna atau kata sandi salah.';
 				}
 				isLoading = false;
 				return;
@@ -81,8 +81,8 @@
 					stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg
 				>
 			</div>
-			<h1 class="text-2xl font-black tracking-tight text-slate-800 uppercase">Admin Access</h1>
-			<p class="text-sm font-medium text-slate-400">Sistem Manajemen Absensi</p>
+			<h1 class="text-2xl font-black tracking-tight text-slate-800 uppercase">Masuk admin</h1>
+			<p class="text-sm font-medium text-slate-400">Pengelolaan absensi terpusat</p>
 		</div>
 
 		{#if errorMessage}
@@ -98,13 +98,13 @@
 				<label
 					for="username"
 					class="ml-1 text-xs font-black tracking-wider text-slate-500 uppercase"
-					>Admin Username</label
+					>Nama pengguna admin</label
 				>
 				<input
 					type="text"
 					id="username"
 					bind:value={username}
-					placeholder="Username Administrator"
+					placeholder="Contoh: admin"
 					class="w-full rounded-2xl border-2 border-slate-100 bg-slate-50 px-5 py-4 font-medium transition-all outline-none focus:border-slate-800 focus:bg-white"
 					required
 				/>
@@ -114,7 +114,7 @@
 				<label
 					for="password"
 					class="ml-1 text-xs font-black tracking-wider text-slate-500 uppercase"
-					>Secure Password</label
+					>Kata sandi</label
 				>
 				<div class="relative">
 					<input
@@ -171,7 +171,7 @@
 						class="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"
 					></span>
 				{:else}
-					Authorize Login
+					Masuk
 				{/if}
 			</button>
 		</form>

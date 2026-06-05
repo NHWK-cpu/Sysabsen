@@ -8,7 +8,9 @@ import (
 	"os"
 	"os/exec"
 	"time"
-
+	"strconv" // Tambahkan ini jika belum ada
+	"github.com/golang-jwt/jwt/v5" // Tambahkan ini untuk membaca context
+    
 	"backend-absensi/config"
 	"backend-absensi/models" // Import package models yang baru
 	"backend-absensi/helpers"
@@ -300,75 +302,174 @@ func GetSiswaByKelas(w http.ResponseWriter, r *http.Request) {
 }
 
 func AssignSiswaToKelas(w http.ResponseWriter, r *http.Request) {
-	var sk struct {
-		SiswaUserID int `json:"siswa_id"` // Ini ID dari tabel 'users' yang dikirim Svelte
-		KelasID     int `json:"kelas_id"`
-	}
-	json.NewDecoder(r.Body).Decode(&sk)
+    var sk struct {
+        SiswaUserID int `json:"siswa_id"`
+        KelasID     int `json:"kelas_id"`
+    }
+    json.NewDecoder(r.Body).Decode(&sk)
 
-	// 1. TERJEMAHKAN: Cari siswa.id yang asli berdasarkan users.id
-	var realSiswaID int
-	err := config.DB.QueryRow("SELECT id FROM siswa WHERE user_id = ?", sk.SiswaUserID).Scan(&realSiswaID)
-	if err != nil {
-		http.Error(w, "Gagal: Profil siswa tidak ditemukan di tabel master siswa.", http.StatusNotFound)
-		return
-	}
+    // AMBIL DATA USER YANG SEDANG LOGIN DARI TOKEN
+    userInfo := r.Context().Value("userInfo").(jwt.MapClaims)
+    role := userInfo["role"].(string)
+    loggedInUserID := int(userInfo["user_id"].(float64))
 
-	// 2. EKSEKUSI menggunakan realSiswaID
-	_, err = config.DB.Exec("INSERT INTO siswa_kelas (siswa_id, kelas_id) VALUES (?, ?)", realSiswaID, sk.KelasID)
-	if err != nil {
-		http.Error(w, "Gagal assign siswa: "+err.Error(), 500)
-		return
-	}
-	w.Write([]byte("Siswa berhasil dimasukkan ke kelas"))
+    // CEK OTORISASI JIKA YANG LOGIN ADALAH GURU
+    if role == "guru" {
+        var waliGuruID int
+        // Cari ID guru berdasarkan user_id, lalu cocokkan dengan wali_guru_id di tabel kelas
+        errCheck := config.DB.QueryRow(`
+            SELECT k.wali_guru_id FROM kelas k 
+            JOIN guru g ON k.wali_guru_id = g.id 
+            WHERE k.id = ? AND g.user_id = ?`, sk.KelasID, loggedInUserID).Scan(&waliGuruID)
+        
+        if errCheck != nil {
+            http.Error(w, "Akses ditolak: Anda bukan wali dari kelas ini!", http.StatusForbidden)
+            return
+        }
+    }
+
+    // TERJEMAHKAN: Cari siswa.id yang asli berdasarkan users.id
+    var realSiswaID int
+    err := config.DB.QueryRow("SELECT id FROM siswa WHERE user_id = ?", sk.SiswaUserID).Scan(&realSiswaID)
+    if err != nil {
+        http.Error(w, "Gagal: Profil siswa tidak ditemukan di tabel master siswa.", http.StatusNotFound)
+        return
+    }
+
+    // EKSEKUSI
+    _, err = config.DB.Exec("INSERT INTO siswa_kelas (siswa_id, kelas_id) VALUES (?, ?)", realSiswaID, sk.KelasID)
+    if err != nil {
+        http.Error(w, "Gagal assign siswa: "+err.Error(), 500)
+        return
+    }
+
+    // CATAT LOG OTOMATIS
+    deskripsi := fmt.Sprintf("Menambahkan siswa (User ID: %d) ke dalam Kelas ID: %d", sk.SiswaUserID, sk.KelasID)
+    go catatLog(loggedInUserID, role, "ASSIGN_SISWA", deskripsi) // Pakai 'go' agar berjalan di background tanpa memblokir respon
+
+    w.Write([]byte("Siswa berhasil dimasukkan ke kelas"))
 }
 
 func UpdateSiswaKelas(w http.ResponseWriter, r *http.Request) {
-	var sk struct {
-		SiswaUserID int `json:"siswa_id"`
-		OldKelasID  int `json:"old_kelas_id"` // Tambahan untuk Kelas Asal
-		NewKelasID  int `json:"new_kelas_id"` // Tambahan untuk Kelas Tujuan
-	}
-	json.NewDecoder(r.Body).Decode(&sk)
+    var sk struct {
+        SiswaUserID int `json:"siswa_id"`
+        OldKelasID  int `json:"old_kelas_id"`
+        NewKelasID  int `json:"new_kelas_id"`
+    }
+    json.NewDecoder(r.Body).Decode(&sk)
 
-	// 1. TERJEMAHKAN ID (Sesuai perbaikan sebelumnya)
-	var realSiswaID int
-	err := config.DB.QueryRow("SELECT id FROM siswa WHERE user_id = ?", sk.SiswaUserID).Scan(&realSiswaID)
-	if err != nil {
-		http.Error(w, "Gagal: Profil siswa tidak ditemukan.", http.StatusNotFound)
-		return
-	}
+    // AMBIL DATA PELAKU DARI TOKEN
+    userInfo := r.Context().Value("userInfo").(jwt.MapClaims)
+    role := userInfo["role"].(string)
+    loggedInUserID := int(userInfo["user_id"].(float64))
 
-	// 2. UPDATE (Mutasi) DENGAN SPESIFIK OLD KELAS
-	// Query ini memastikan HANYA kelas yang dipilih yang akan diganti
-	_, err = config.DB.Exec("UPDATE siswa_kelas SET kelas_id = ? WHERE siswa_id = ? AND kelas_id = ?", sk.NewKelasID, realSiswaID, sk.OldKelasID)
-	if err != nil {
-		http.Error(w, "Gagal update kelas siswa: "+err.Error(), 500)
-		return
-	}
-	w.Write([]byte("Data kelas siswa berhasil diperbarui (Mutasi Berhasil)"))
+    // CEK OTORISASI KHUSUS GURU
+    if role == "guru" {
+        // Logikanya: Guru hanya boleh memutasi siswa JIKA dia adalah wali dari kelas asal (OldKelasID)
+        var waliGuruID int
+        errCheck := config.DB.QueryRow(`
+            SELECT k.wali_guru_id FROM kelas k 
+            JOIN guru g ON k.wali_guru_id = g.id 
+            WHERE k.id = ? AND g.user_id = ?`, sk.OldKelasID, loggedInUserID).Scan(&waliGuruID)
+        
+        if errCheck != nil {
+            http.Error(w, "Akses ditolak: Anda bukan wali dari kelas asal siswa ini!", http.StatusForbidden)
+            return
+        }
+    }
+
+    // 1. TERJEMAHKAN ID SISWA
+    var realSiswaID int
+    err := config.DB.QueryRow("SELECT id FROM siswa WHERE user_id = ?", sk.SiswaUserID).Scan(&realSiswaID)
+    if err != nil {
+        http.Error(w, "Gagal: Profil siswa tidak ditemukan.", http.StatusNotFound)
+        return
+    }
+
+    // 2. EKSEKUSI UPDATE
+    _, err = config.DB.Exec("UPDATE siswa_kelas SET kelas_id = ? WHERE siswa_id = ? AND kelas_id = ?", sk.NewKelasID, realSiswaID, sk.OldKelasID)
+    if err != nil {
+        http.Error(w, "Gagal update kelas siswa: "+err.Error(), 500)
+        return
+    }
+
+    // 3. CATAT LOG MUTASI
+    deskripsi := fmt.Sprintf("Mutasi siswa (User ID: %d) dari Kelas ID: %d menuju Kelas ID: %d", sk.SiswaUserID, sk.OldKelasID, sk.NewKelasID)
+    go catatLog(loggedInUserID, role, "UPDATE_SISWA_KELAS", deskripsi)
+
+    w.Write([]byte("Data kelas siswa berhasil diperbarui (Mutasi Berhasil)"))
 }
 
 func RemoveSiswaFromKelas(w http.ResponseWriter, r *http.Request) {
-	// Menangkap ID dari URL query parameter
-	userSiswaID := r.URL.Query().Get("siswa_id")
-	kelasID := r.URL.Query().Get("kelas_id")
+    userSiswaID := r.URL.Query().Get("siswa_id")
+    kelasID := r.URL.Query().Get("kelas_id")
+    deleteLogs := r.URL.Query().Get("delete_logs") // Menangkap parameter "true" atau "false"
+    
+    kelasIDInt, _ := strconv.Atoi(kelasID)
 
-	// 1. TERJEMAHKAN ID
-	var realSiswaID int
-	err := config.DB.QueryRow("SELECT id FROM siswa WHERE user_id = ?", userSiswaID).Scan(&realSiswaID)
-	if err != nil {
-		http.Error(w, "Gagal: Profil siswa tidak ditemukan.", http.StatusNotFound)
-		return
-	}
+    // AMBIL DATA USER YANG SEDANG LOGIN
+    userInfo := r.Context().Value("userInfo").(jwt.MapClaims)
+    role := userInfo["role"].(string)
+    loggedInUserID := int(userInfo["user_id"].(float64))
 
-	// 2. DELETE menggunakan realSiswaID
-	_, err = config.DB.Exec("DELETE FROM siswa_kelas WHERE siswa_id = ? AND kelas_id = ?", realSiswaID, kelasID)
-	if err != nil {
-		http.Error(w, "Gagal mengeluarkan siswa dari kelas: "+err.Error(), 500)
-		return
-	}
-	w.Write([]byte("Siswa berhasil dikeluarkan dari kelas tersebut"))
+    // CEK OTORISASI GURU
+    if role == "guru" {
+        var waliGuruID int
+        errCheck := config.DB.QueryRow(`
+            SELECT k.wali_guru_id FROM kelas k 
+            JOIN guru g ON k.wali_guru_id = g.id 
+            WHERE k.id = ? AND g.user_id = ?`, kelasIDInt, loggedInUserID).Scan(&waliGuruID)
+        
+        if errCheck != nil {
+            http.Error(w, "Akses ditolak: Anda bukan wali dari kelas ini!", http.StatusForbidden)
+            return
+        }
+    }
+
+    // TERJEMAHKAN ID
+    var realSiswaID int
+    err := config.DB.QueryRow("SELECT id FROM siswa WHERE user_id = ?", userSiswaID).Scan(&realSiswaID)
+    if err != nil {
+        http.Error(w, "Gagal: Profil siswa tidak ditemukan.", http.StatusNotFound)
+        return
+    }
+
+    // MULAI TRANSAKSI
+    tx, err := config.DB.Begin()
+    if err != nil {
+        http.Error(w, "Gagal memulai pemrosesan data", http.StatusInternalServerError)
+        return
+    }
+    defer tx.Rollback() // Akan dibatalkan jika ada error sebelum tx.Commit()
+
+    // JIKA GURU MEMILIH MENGHAPUS LOG ABSENSI
+    if deleteLogs == "true" {
+        queryDeleteLogs := `
+            DELETE l FROM log_kehadiran l
+            JOIN sesi_pembelajaran sp ON l.sesi_id = sp.id
+            WHERE l.siswa_id = ? AND sp.kelas_id = ?
+        `
+        _, err = tx.Exec(queryDeleteLogs, realSiswaID, kelasID)
+        if err != nil {
+            http.Error(w, "Gagal menghapus riwayat absen: "+err.Error(), 500)
+            return
+        }
+    }
+
+    // HAPUS DARI KELAS
+    _, err = tx.Exec("DELETE FROM siswa_kelas WHERE siswa_id = ? AND kelas_id = ?", realSiswaID, kelasID)
+    if err != nil {
+        http.Error(w, "Gagal mengeluarkan siswa dari kelas: "+err.Error(), 500)
+        return
+    }
+
+    tx.Commit()
+
+    // CATAT LOG OTOMATIS
+    deskripsi := fmt.Sprintf("Mengeluarkan siswa (User ID: %s) dari Kelas ID: %s. Hapus Log: %s", userSiswaID, kelasID, deleteLogs)
+    go catatLog(loggedInUserID, role, "REMOVE_SISWA", deskripsi)
+
+    w.Write([]byte("Siswa berhasil dikeluarkan dari kelas tersebut"))
 }
 
 // ==========================================
@@ -528,26 +629,33 @@ func CreateKelas(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetAllKelas(w http.ResponseWriter, r *http.Request) {
-	// Query disesuaikan untuk mengambil periode_id
-	rows, err := config.DB.Query("SELECT id, periode_id, nama_kelas FROM kelas")
-	if err != nil {
-		http.Error(w, "Gagal mengambil data: "+err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer rows.Close()
+    // 1. Gunakan LEFT JOIN ke tabel guru untuk menarik g.user_id
+    query := `
+        SELECT k.id, k.periode_id, g.user_id, k.nama_kelas 
+        FROM kelas k
+        LEFT JOIN guru g ON k.wali_guru_id = g.id
+    `
+    rows, err := config.DB.Query(query)
+    if err != nil {
+        http.Error(w, "Gagal mengambil data: "+err.Error(), http.StatusInternalServerError)
+        return
+    }
+    defer rows.Close()
 
-	var listKelas []models.Kelas
-	for rows.Next() {
-		var k models.Kelas
-		// Urutan Scan harus sama persis dengan urutan SELECT
-		if err := rows.Scan(&k.ID, &k.PeriodeID, &k.NamaKelas); err != nil {
-			continue
-		}
-		listKelas = append(listKelas, k)
-	}
+    var listKelas []models.Kelas
+    for rows.Next() {
+        var k models.Kelas
+        // 2. Scan HARUS 4 variabel sesuai dengan urutan SELECT di atas!
+        // k.WaliGuruID sekarang akan berisi g.user_id, sehingga cocok dengan Frontend Svelte
+        if err := rows.Scan(&k.ID, &k.PeriodeID, &k.WaliGuruID, &k.NamaKelas); err != nil {
+            fmt.Println("Error scan kelas:", err) // Tambahkan ini agar kalau error kelihatan di terminal VPS/Lokal
+            continue
+        }
+        listKelas = append(listKelas, k)
+    }
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(listKelas)
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(listKelas)
 }
 
 func UpdateKelas(w http.ResponseWriter, r *http.Request) {
@@ -591,10 +699,11 @@ func DeleteKelas(w http.ResponseWriter, r *http.Request) {
 // GetDashboardStats: API untuk Dashboard Admin (Sesuai Desain UI)
 func GetDashboardStats(w http.ResponseWriter, r *http.Request) {
 	var stats struct {
-		TotalUsers     int `json:"total_users"`
-		ActiveUsers    int `json:"active_users"`
-		InactiveUsers  int `json:"inactive_users"`
-		PendingDevices int `json:"pending_devices"`
+		TotalUsers              int `json:"total_users"`
+		ActiveUsers             int `json:"active_users"`
+		InactiveUsers           int `json:"inactive_users"`
+		PendingDevices          int `json:"pending_devices"`
+		PendingSiswaRegistrations int `json:"pending_siswa_registrations"`
 		RecentLogins   []struct {
 			Time   string `json:"time"`
 			User   string `json:"user"`
@@ -616,6 +725,9 @@ func GetDashboardStats(w http.ResponseWriter, r *http.Request) {
 
 	// 4. Hitung Pending Device
 	config.DB.QueryRow("SELECT COUNT(*) FROM user_devices WHERE status = 'pending'").Scan(&stats.PendingDevices)
+
+	// 4b. Siswa mendaftar mandiri, menunggu persetujuan admin
+	config.DB.QueryRow("SELECT COUNT(*) FROM users WHERE role = 'siswa' AND is_active = 0").Scan(&stats.PendingSiswaRegistrations)
 
 	// 5. Ambil 5 History Login Terbaru (Hanya yang is_active = 1 yang boleh tampil di "Login Terbaru")
 	query := `
@@ -749,3 +861,8 @@ func GetAllUsers(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(list)
 }
+
+func catatLog(userID int, role, action, deskripsi string) {
+    config.DB.Exec("INSERT INTO activity_logs (user_id, role, action, deskripsi) VALUES (?, ?, ?, ?)", userID, role, action, deskripsi)
+}
+

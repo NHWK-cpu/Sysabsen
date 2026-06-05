@@ -4,21 +4,71 @@ package docs
 import "github.com/swaggo/swag"
 
 const docTemplate = `{
-    "schemes": {{ marshal .Schemes }},
     "swagger": "2.0",
     "info": {
-        "description": "{{escape .Description}}",
-        "title": "{{.Title}}",
+        "description": "Ini adalah dokumentasi REST API untuk aplikasi absensi dengan fitur QR & Geofencing.",
+        "title": "API Sistem Absensi Tempat Les",
         "termsOfService": "http://swagger.io/terms/",
         "contact": {
             "name": "Hafizh",
             "email": "hafizh@example.com"
         },
-        "version": "{{.Version}}"
+        "version": "1.0"
     },
-    "host": "{{.Host}}",
-    "basePath": "{{.BasePath}}",
     "paths": {
+        "/admin/backup": {
+            "post": {
+                "summary": "Cadangkan Backup",
+                "description": "Cadangkan Backup pada modul backend absensi.",
+                "tags": [
+                    "4. Admin - Dashboard & Device"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Aksi berhasil dilakukan",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.SuccessMessage"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    }
+                },
+                "consumes": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "operationId": "post_admin_backup"
+            }
+        },
         "/admin/dashboard/stats": {
             "get": {
                 "security": [
@@ -31,7 +81,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "4. Admin - Dashboard \u0026 Device"
+                    "4. Admin - Dashboard & Device"
                 ],
                 "summary": "Statistik Dashboard Admin",
                 "responses": {
@@ -40,8 +90,144 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/controllers.AdminStatsResponse"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
                     }
-                }
+                },
+                "operationId": "get_admin_dashboard_stats"
+            }
+        },
+        "/admin/device/approve": {
+            "post": {
+                "summary": "Setujui Device",
+                "description": "Setujui Device pada modul backend absensi.",
+                "tags": [
+                    "4. Admin - Dashboard & Device"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Aksi berhasil dilakukan",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.SuccessMessage"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    }
+                },
+                "consumes": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "operationId": "post_admin_device_approve",
+                "parameters": [
+                    {
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "description": "ID perangkat",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.DeviceActionReq"
+                        }
+                    }
+                ]
+            }
+        },
+        "/admin/device/pending": {
+            "get": {
+                "summary": "Daftar Pending Device",
+                "description": "Daftar Pending Device pada modul backend absensi.",
+                "tags": [
+                    "4. Admin - Dashboard & Device"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data berhasil diambil"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "operationId": "get_admin_device_pending"
             }
         },
         "/admin/device/reject": {
@@ -59,7 +245,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "4. Admin - Dashboard \u0026 Device"
+                    "4. Admin - Dashboard & Device"
                 ],
                 "summary": "Tolak Perangkat Siswa",
                 "parameters": [
@@ -79,8 +265,239 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/controllers.SuccessMessage"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
                     }
-                }
+                },
+                "operationId": "post_admin_device_reject"
+            }
+        },
+        "/admin/guru/create": {
+            "post": {
+                "summary": "Buat Guru",
+                "description": "Buat Guru pada modul backend absensi.",
+                "tags": [
+                    "5. Admin - Master Data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Aksi berhasil dilakukan",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.SuccessMessage"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    }
+                },
+                "consumes": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "operationId": "post_admin_guru_create"
+            }
+        },
+        "/admin/guru/delete": {
+            "delete": {
+                "summary": "Hapus Guru",
+                "description": "Hapus Guru pada modul backend absensi.",
+                "tags": [
+                    "5. Admin - Master Data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Aksi berhasil dilakukan",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.SuccessMessage"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    }
+                },
+                "consumes": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "operationId": "delete_admin_guru_delete"
+            }
+        },
+        "/admin/guru/update": {
+            "put": {
+                "summary": "Perbarui Guru",
+                "description": "Perbarui Guru pada modul backend absensi.",
+                "tags": [
+                    "5. Admin - Master Data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Aksi berhasil dilakukan",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.SuccessMessage"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    }
+                },
+                "consumes": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "operationId": "put_admin_guru_update"
+            }
+        },
+        "/admin/kelas/all": {
+            "get": {
+                "summary": "Ambil Semua Kelas",
+                "description": "Ambil Semua Kelas pada modul backend absensi.",
+                "tags": [
+                    "5. Admin - Master Data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data berhasil diambil"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "operationId": "get_admin_kelas_all"
             }
         },
         "/admin/kelas/create": {
@@ -117,8 +534,340 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/controllers.SuccessMessage"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
                     }
-                }
+                },
+                "operationId": "post_admin_kelas_create",
+                "description": "Buat Kelas pada modul backend absensi."
+            }
+        },
+        "/admin/kelas/delete": {
+            "delete": {
+                "summary": "Hapus Kelas",
+                "description": "Hapus Kelas pada modul backend absensi.",
+                "tags": [
+                    "5. Admin - Master Data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Aksi berhasil dilakukan",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.SuccessMessage"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    }
+                },
+                "consumes": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "operationId": "delete_admin_kelas_delete"
+            }
+        },
+        "/admin/kelas/remove-wali": {
+            "delete": {
+                "summary": "Remove Wali Kelas",
+                "description": "Remove Wali Kelas pada modul backend absensi.",
+                "tags": [
+                    "5. Admin - Master Data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Aksi berhasil dilakukan",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.SuccessMessage"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    }
+                },
+                "consumes": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "operationId": "delete_admin_kelas_remove_wali"
+            }
+        },
+        "/admin/kelas/set-wali": {
+            "put": {
+                "summary": "Set Wali Kelas",
+                "description": "Set Wali Kelas pada modul backend absensi.",
+                "tags": [
+                    "5. Admin - Master Data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Aksi berhasil dilakukan",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.SuccessMessage"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    }
+                },
+                "consumes": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "operationId": "put_admin_kelas_set_wali"
+            }
+        },
+        "/admin/kelas/siswa": {
+            "get": {
+                "summary": "Siswa Kelas",
+                "description": "Siswa Kelas pada modul backend absensi.",
+                "tags": [
+                    "5. Admin - Master Data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data berhasil diambil"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "operationId": "get_admin_kelas_siswa"
+            }
+        },
+        "/admin/kelas/update": {
+            "put": {
+                "summary": "Perbarui Kelas",
+                "description": "Perbarui Kelas pada modul backend absensi.",
+                "tags": [
+                    "5. Admin - Master Data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Aksi berhasil dilakukan",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.SuccessMessage"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    }
+                },
+                "consumes": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "operationId": "put_admin_kelas_update"
+            }
+        },
+        "/admin/mapel/all": {
+            "get": {
+                "summary": "Ambil Semua Mapel",
+                "description": "Ambil Semua Mapel pada modul backend absensi.",
+                "tags": [
+                    "5. Admin - Master Data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data berhasil diambil"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "operationId": "get_admin_mapel_all"
             }
         },
         "/admin/mapel/create": {
@@ -155,8 +904,758 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/controllers.SuccessMessage"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
                     }
-                }
+                },
+                "operationId": "post_admin_mapel_create",
+                "description": "Buat Mapel pada modul backend absensi."
+            }
+        },
+        "/admin/mapel/delete": {
+            "delete": {
+                "summary": "Hapus Mapel",
+                "description": "Hapus Mapel pada modul backend absensi.",
+                "tags": [
+                    "5. Admin - Master Data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Aksi berhasil dilakukan",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.SuccessMessage"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    }
+                },
+                "consumes": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "operationId": "delete_admin_mapel_delete"
+            }
+        },
+        "/admin/mapel/status": {
+            "put": {
+                "summary": "Ubah Status Mapel",
+                "description": "Ubah Status Mapel pada modul backend absensi.",
+                "tags": [
+                    "5. Admin - Master Data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Aksi berhasil dilakukan",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.SuccessMessage"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    }
+                },
+                "consumes": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "operationId": "put_admin_mapel_status"
+            }
+        },
+        "/admin/mapel/update": {
+            "put": {
+                "summary": "Perbarui Mapel",
+                "description": "Perbarui Mapel pada modul backend absensi.",
+                "tags": [
+                    "5. Admin - Master Data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Aksi berhasil dilakukan",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.SuccessMessage"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    }
+                },
+                "consumes": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "operationId": "put_admin_mapel_update"
+            }
+        },
+        "/admin/periode/all": {
+            "get": {
+                "summary": "Ambil Semua Periode",
+                "description": "Ambil Semua Periode pada modul backend absensi.",
+                "tags": [
+                    "5. Admin - Master Data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data berhasil diambil"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "operationId": "get_admin_periode_all"
+            }
+        },
+        "/admin/periode/create": {
+            "post": {
+                "summary": "Buat Periode",
+                "description": "Buat Periode pada modul backend absensi.",
+                "tags": [
+                    "5. Admin - Master Data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Aksi berhasil dilakukan",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.SuccessMessage"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    }
+                },
+                "consumes": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "operationId": "post_admin_periode_create"
+            }
+        },
+        "/admin/periode/delete": {
+            "delete": {
+                "summary": "Hapus Periode",
+                "description": "Hapus Periode pada modul backend absensi.",
+                "tags": [
+                    "5. Admin - Master Data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Aksi berhasil dilakukan",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.SuccessMessage"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    }
+                },
+                "consumes": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "operationId": "delete_admin_periode_delete"
+            }
+        },
+        "/admin/periode/update": {
+            "put": {
+                "summary": "Perbarui Periode",
+                "description": "Perbarui Periode pada modul backend absensi.",
+                "tags": [
+                    "5. Admin - Master Data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Aksi berhasil dilakukan",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.SuccessMessage"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    }
+                },
+                "consumes": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "operationId": "put_admin_periode_update"
+            }
+        },
+        "/admin/restore": {
+            "post": {
+                "summary": "Pulihkan Restore",
+                "description": "Pulihkan Restore pada modul backend absensi.",
+                "tags": [
+                    "4. Admin - Dashboard & Device"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Aksi berhasil dilakukan",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.SuccessMessage"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    }
+                },
+                "consumes": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "operationId": "post_admin_restore"
+            }
+        },
+        "/admin/siswa-kelas/assign": {
+            "post": {
+                "summary": "Assign Siswa-Kelas",
+                "description": "Assign Siswa-Kelas pada modul backend absensi.",
+                "tags": [
+                    "5. Admin - Master Data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Aksi berhasil dilakukan",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.SuccessMessage"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    }
+                },
+                "consumes": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "operationId": "post_admin_siswa_kelas_assign"
+            }
+        },
+        "/admin/siswa-kelas/list": {
+            "post": {
+                "summary": "Daftar Siswa-Kelas",
+                "description": "Daftar Siswa-Kelas pada modul backend absensi.",
+                "tags": [
+                    "5. Admin - Master Data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Aksi berhasil dilakukan",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.SuccessMessage"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    }
+                },
+                "consumes": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "operationId": "post_admin_siswa_kelas_list",
+                "parameters": [
+                    {
+                        "name": "kelas_id",
+                        "in": "query",
+                        "required": true,
+                        "type": "integer",
+                        "description": "ID kelas"
+                    }
+                ]
+            }
+        },
+        "/admin/siswa-kelas/remove": {
+            "delete": {
+                "summary": "Lepas Siswa-Kelas",
+                "description": "Lepas Siswa-Kelas pada modul backend absensi.",
+                "tags": [
+                    "5. Admin - Master Data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Aksi berhasil dilakukan",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.SuccessMessage"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    }
+                },
+                "consumes": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "operationId": "delete_admin_siswa_kelas_remove",
+                "parameters": [
+                    {
+                        "name": "siswa_id",
+                        "in": "query",
+                        "required": true,
+                        "type": "integer",
+                        "description": "ID siswa"
+                    },
+                    {
+                        "name": "kelas_id",
+                        "in": "query",
+                        "required": true,
+                        "type": "integer",
+                        "description": "ID kelas"
+                    }
+                ]
+            }
+        },
+        "/admin/siswa-kelas/reset-absen": {
+            "delete": {
+                "summary": "Reset Absen Siswa-Kelas",
+                "description": "Reset Absen Siswa-Kelas pada modul backend absensi.",
+                "tags": [
+                    "5. Admin - Master Data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Aksi berhasil dilakukan",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.SuccessMessage"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    }
+                },
+                "consumes": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "operationId": "delete_admin_siswa_kelas_reset_absen",
+                "parameters": [
+                    {
+                        "name": "siswa_id",
+                        "in": "query",
+                        "required": true,
+                        "type": "integer",
+                        "description": "ID siswa"
+                    },
+                    {
+                        "name": "kelas_id",
+                        "in": "query",
+                        "required": true,
+                        "type": "integer",
+                        "description": "ID kelas"
+                    }
+                ]
+            }
+        },
+        "/admin/siswa-kelas/update": {
+            "put": {
+                "summary": "Perbarui Siswa-Kelas",
+                "description": "Perbarui Siswa-Kelas pada modul backend absensi.",
+                "tags": [
+                    "5. Admin - Master Data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Aksi berhasil dilakukan",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.SuccessMessage"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    }
+                },
+                "consumes": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "operationId": "put_admin_siswa_kelas_update"
             }
         },
         "/admin/siswa/all": {
@@ -183,8 +1682,410 @@ const docTemplate = `{
                                 "$ref": "#/definitions/controllers.SiswaData"
                             }
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
                     }
-                }
+                },
+                "operationId": "get_admin_siswa_all"
+            }
+        },
+        "/admin/siswa/approve-registration": {
+            "post": {
+                "summary": "Approve Registration Siswa",
+                "description": "Approve Registration Siswa pada modul backend absensi.",
+                "tags": [
+                    "5. Admin - Master Data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Aksi berhasil dilakukan",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.SuccessMessage"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    }
+                },
+                "consumes": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "operationId": "post_admin_siswa_approve_registration"
+            }
+        },
+        "/admin/siswa/clue": {
+            "get": {
+                "summary": "Clue Siswa",
+                "description": "Clue Siswa pada modul backend absensi.",
+                "tags": [
+                    "5. Admin - Master Data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data berhasil diambil"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "operationId": "get_admin_siswa_clue",
+                "parameters": [
+                    {
+                        "name": "siswa_id",
+                        "in": "query",
+                        "required": true,
+                        "type": "integer",
+                        "description": "ID siswa"
+                    }
+                ]
+            }
+        },
+        "/admin/siswa/create": {
+            "post": {
+                "summary": "Buat Siswa",
+                "description": "Buat Siswa pada modul backend absensi.",
+                "tags": [
+                    "5. Admin - Master Data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Aksi berhasil dilakukan",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.SuccessMessage"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    }
+                },
+                "consumes": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "operationId": "post_admin_siswa_create"
+            }
+        },
+        "/admin/siswa/delete": {
+            "delete": {
+                "summary": "Hapus Siswa",
+                "description": "Hapus Siswa pada modul backend absensi.",
+                "tags": [
+                    "5. Admin - Master Data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Aksi berhasil dilakukan",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.SuccessMessage"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    }
+                },
+                "consumes": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "operationId": "delete_admin_siswa_delete"
+            }
+        },
+        "/admin/siswa/import": {
+            "post": {
+                "summary": "Import Siswa",
+                "description": "Import Siswa pada modul backend absensi.",
+                "tags": [
+                    "5. Admin - Master Data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Aksi berhasil dilakukan",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.SuccessMessage"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    }
+                },
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "operationId": "post_admin_siswa_import",
+                "parameters": [
+                    {
+                        "name": "file_excel",
+                        "in": "formData",
+                        "required": true,
+                        "type": "file",
+                        "description": "File Excel .xlsx"
+                    }
+                ]
+            }
+        },
+        "/admin/siswa/pending-registrations": {
+            "get": {
+                "summary": "Pending Registrations Siswa",
+                "description": "Pending Registrations Siswa pada modul backend absensi.",
+                "tags": [
+                    "5. Admin - Master Data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data berhasil diambil"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "operationId": "get_admin_siswa_pending_registrations"
+            }
+        },
+        "/admin/siswa/reject-registration": {
+            "post": {
+                "summary": "Reject Registration Siswa",
+                "description": "Reject Registration Siswa pada modul backend absensi.",
+                "tags": [
+                    "5. Admin - Master Data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Aksi berhasil dilakukan",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.SuccessMessage"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    }
+                },
+                "consumes": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "operationId": "post_admin_siswa_reject_registration"
             }
         },
         "/admin/siswa/reset-password": {
@@ -202,7 +2103,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "4. Admin - Device \u0026 Keamanan"
+                    "1. Auth & Keamanan"
                 ],
                 "summary": "Reset Password Siswa (Lupa Password)",
                 "parameters": [
@@ -222,8 +2123,280 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/controllers.SuccessMessage"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
                     }
-                }
+                },
+                "operationId": "post_admin_siswa_reset_password"
+            }
+        },
+        "/admin/siswa/update": {
+            "put": {
+                "summary": "Perbarui Siswa",
+                "description": "Perbarui Siswa pada modul backend absensi.",
+                "tags": [
+                    "5. Admin - Master Data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Aksi berhasil dilakukan",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.SuccessMessage"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    }
+                },
+                "consumes": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "operationId": "put_admin_siswa_update"
+            }
+        },
+        "/admin/users/all": {
+            "get": {
+                "summary": "Ambil Semua Users",
+                "description": "Ambil Semua Users pada modul backend absensi.",
+                "tags": [
+                    "5. Admin - Master Data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data berhasil diambil"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "operationId": "get_admin_users_all"
+            }
+        },
+        "/admin/users/inactive": {
+            "get": {
+                "summary": "Inactive Users",
+                "description": "Inactive Users pada modul backend absensi.",
+                "tags": [
+                    "5. Admin - Master Data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data berhasil diambil"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "operationId": "get_admin_users_inactive"
+            }
+        },
+        "/dashboard": {
+            "post": {
+                "summary": "Dashboard Sistem",
+                "description": "Dashboard Sistem pada modul backend absensi.",
+                "tags": [
+                    "Lainnya"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Aksi berhasil dilakukan",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.SuccessMessage"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    }
+                },
+                "consumes": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "operationId": "post_dashboard"
+            }
+        },
+        "/guru/absen": {
+            "post": {
+                "summary": "Absen Absen",
+                "description": "Absen Absen pada modul backend absensi.",
+                "tags": [
+                    "3. Operasional Guru"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Aksi berhasil dilakukan",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.SuccessMessage"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    }
+                },
+                "consumes": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "operationId": "post_guru_absen"
             }
         },
         "/guru/backup": {
@@ -247,8 +2420,33 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/controllers.SuccessMessage"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
                     }
-                }
+                },
+                "operationId": "get_guru_backup"
             }
         },
         "/guru/dashboard/attendance-list": {
@@ -284,8 +2482,33 @@ const docTemplate = `{
                                 "$ref": "#/definitions/controllers.StudentStatusList"
                             }
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
                     }
-                }
+                },
+                "operationId": "get_guru_dashboard_attendance_list"
             }
         },
         "/guru/dashboard/stats": {
@@ -318,8 +2541,33 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/controllers.GuruStatsResponse"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
                     }
-                }
+                },
+                "operationId": "get_guru_dashboard_stats"
             }
         },
         "/guru/export": {
@@ -343,8 +2591,75 @@ const docTemplate = `{
                         "schema": {
                             "type": "file"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
                     }
-                }
+                },
+                "operationId": "get_guru_export"
+            }
+        },
+        "/guru/forgot-password": {
+            "post": {
+                "summary": "Forgot Password Forgot-Password",
+                "description": "Forgot Password Forgot-Password pada modul backend absensi.",
+                "tags": [
+                    "1. Auth & Keamanan"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Aksi berhasil dilakukan",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.SuccessMessage"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    }
+                },
+                "consumes": [
+                    "application/json"
+                ],
+                "operationId": "post_guru_forgot_password"
             }
         },
         "/guru/generate-qr": {
@@ -377,8 +2692,33 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/controllers.GuruQRResponse"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
                     }
-                }
+                },
+                "operationId": "get_guru_generate_qr"
             }
         },
         "/guru/jadwal": {
@@ -405,8 +2745,183 @@ const docTemplate = `{
                                 "$ref": "#/definitions/controllers.JadwalGuru"
                             }
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
                     }
-                }
+                },
+                "operationId": "get_guru_jadwal"
+            }
+        },
+        "/guru/kelas": {
+            "get": {
+                "summary": "Kelas Kelas",
+                "description": "Kelas Kelas pada modul backend absensi.",
+                "tags": [
+                    "3. Operasional Guru"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data berhasil diambil"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "operationId": "get_guru_kelas"
+            }
+        },
+        "/guru/kelas/siswa": {
+            "get": {
+                "summary": "Siswa Kelas",
+                "description": "Siswa Kelas pada modul backend absensi.",
+                "tags": [
+                    "3. Operasional Guru"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data berhasil diambil"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "operationId": "get_guru_kelas_siswa",
+                "parameters": [
+                    {
+                        "name": "kelas_id",
+                        "in": "query",
+                        "required": true,
+                        "type": "integer",
+                        "description": "ID kelas"
+                    }
+                ]
+            }
+        },
+        "/guru/mapel": {
+            "get": {
+                "summary": "Mapel Mapel",
+                "description": "Mapel Mapel pada modul backend absensi.",
+                "tags": [
+                    "3. Operasional Guru"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data berhasil diambil"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "operationId": "get_guru_mapel"
             }
         },
         "/guru/reset-password": {
@@ -419,7 +2934,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "1. Auth \u0026 Keamanan"
+                    "1. Auth & Keamanan"
                 ],
                 "summary": "Eksekusi Reset Password",
                 "parameters": [
@@ -439,8 +2954,27 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/controllers.SuccessMessage"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
                     }
-                }
+                },
+                "operationId": "post_guru_reset_password"
             }
         },
         "/guru/restore": {
@@ -476,8 +3010,133 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/controllers.SuccessMessage"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
                     }
-                }
+                },
+                "operationId": "post_guru_restore"
+            }
+        },
+        "/guru/sesi/init": {
+            "post": {
+                "summary": "Inisialisasi Sesi",
+                "description": "Inisialisasi Sesi pada modul backend absensi.",
+                "tags": [
+                    "3. Operasional Guru"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Aksi berhasil dilakukan",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.SuccessMessage"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    }
+                },
+                "consumes": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "operationId": "post_guru_sesi_init"
+            }
+        },
+        "/guru/siswa/all": {
+            "get": {
+                "summary": "Ambil Semua Siswa",
+                "description": "Ambil Semua Siswa pada modul backend absensi.",
+                "tags": [
+                    "3. Operasional Guru"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data berhasil diambil"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "operationId": "get_guru_siswa_all"
             }
         },
         "/login": {
@@ -490,9 +3149,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "1. Auth \u0026 Keamanan"
+                    "1. Auth & Keamanan"
                 ],
-                "summary": "Login Admin \u0026 Guru",
+                "summary": "Login Admin & Guru",
                 "parameters": [
                     {
                         "description": "Kredensial Login",
@@ -510,8 +3169,21 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/controllers.LoginSiswaResponse"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
                     }
-                }
+                },
+                "operationId": "post_login"
             }
         },
         "/login/siswa": {
@@ -524,7 +3196,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "1. Auth \u0026 Keamanan"
+                    "1. Auth & Keamanan"
                 ],
                 "summary": "Login untuk Siswa",
                 "parameters": [
@@ -550,8 +3222,104 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/controllers.ErrorMessage"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
                     }
-                }
+                },
+                "operationId": "post_login_siswa"
+            }
+        },
+        "/register/siswa": {
+            "post": {
+                "summary": "Siswa Siswa",
+                "description": "Siswa Siswa pada modul backend absensi.",
+                "tags": [
+                    "1. Auth & Keamanan"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Aksi berhasil dilakukan",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.SuccessMessage"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    }
+                },
+                "consumes": [
+                    "application/json"
+                ],
+                "operationId": "post_register_siswa"
+            }
+        },
+        "/siswa/absen": {
+            "post": {
+                "summary": "Absen Absen",
+                "description": "Absen Absen pada modul backend absensi.",
+                "tags": [
+                    "2. Operasional Siswa"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Aksi berhasil dilakukan",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.SuccessMessage"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    }
+                },
+                "consumes": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "operationId": "post_siswa_absen"
             }
         },
         "/siswa/absen/submit": {
@@ -595,8 +3363,27 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/controllers.ErrorMessage"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
                     }
-                }
+                },
+                "operationId": "post_siswa_absen_submit"
             }
         },
         "/siswa/riwayat": {
@@ -623,8 +3410,386 @@ const docTemplate = `{
                                 "$ref": "#/definitions/controllers.RiwayatAbsenSiswa"
                             }
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
                     }
-                }
+                },
+                "operationId": "get_siswa_riwayat"
+            }
+        },
+        "/superadmin/admin/all": {
+            "get": {
+                "summary": "Ambil Semua Admin",
+                "description": "Ambil Semua Admin pada modul backend absensi.",
+                "tags": [
+                    "6. Super Admin"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data berhasil diambil"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "operationId": "get_superadmin_admin_all"
+            }
+        },
+        "/superadmin/admin/create": {
+            "post": {
+                "summary": "Buat Admin",
+                "description": "Buat Admin pada modul backend absensi.",
+                "tags": [
+                    "6. Super Admin"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Aksi berhasil dilakukan",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.SuccessMessage"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    }
+                },
+                "consumes": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "operationId": "post_superadmin_admin_create"
+            }
+        },
+        "/superadmin/admin/toggle": {
+            "put": {
+                "summary": "Toggle Admin",
+                "description": "Toggle Admin pada modul backend absensi.",
+                "tags": [
+                    "6. Super Admin"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Aksi berhasil dilakukan",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.SuccessMessage"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    }
+                },
+                "consumes": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "operationId": "put_superadmin_admin_toggle"
+            }
+        },
+        "/superadmin/admin/update": {
+            "put": {
+                "summary": "Perbarui Admin",
+                "description": "Perbarui Admin pada modul backend absensi.",
+                "tags": [
+                    "6. Super Admin"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Aksi berhasil dilakukan",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.SuccessMessage"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    }
+                },
+                "consumes": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "operationId": "put_superadmin_admin_update"
+            }
+        },
+        "/superadmin/logs": {
+            "get": {
+                "summary": "Logs Logs",
+                "description": "Logs Logs pada modul backend absensi.",
+                "tags": [
+                    "6. Super Admin"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data berhasil diambil"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "operationId": "get_superadmin_logs"
+            }
+        },
+        "/superadmin/users/hard-delete": {
+            "delete": {
+                "summary": "Hapus Permanen Users",
+                "description": "Hapus Permanen Users pada modul backend absensi.",
+                "tags": [
+                    "6. Super Admin"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Aksi berhasil dilakukan",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.SuccessMessage"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    }
+                },
+                "consumes": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "operationId": "delete_superadmin_users_hard_delete"
+            }
+        },
+        "/superadmin/users/reactivate": {
+            "put": {
+                "summary": "Aktifkan Ulang Users",
+                "description": "Aktifkan Ulang Users pada modul backend absensi.",
+                "tags": [
+                    "6. Super Admin"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Aksi berhasil dilakukan",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.SuccessMessage"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorMessage"
+                        }
+                    }
+                },
+                "consumes": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "operationId": "put_superadmin_users_reactivate"
             }
         }
     },
@@ -685,7 +3850,7 @@ const docTemplate = `{
             "properties": {
                 "nama_mapel": {
                     "type": "string",
-                    "example": "Pemrograman Web \u0026 Perangkat Bergerak"
+                    "example": "Pemrograman Web & Perangkat Bergerak"
                 }
             }
         },

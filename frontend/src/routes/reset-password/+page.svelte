@@ -34,7 +34,7 @@
 
 		// Validasi kecocokan password di frontend
 		if (newPassword !== confirmPassword) {
-			errorMessage = 'Konfirmasi password tidak cocok!';
+			errorMessage = 'Konfirmasi kata sandi tidak cocok!';
 			isLoading = false;
 			return;
 		}
@@ -54,7 +54,7 @@
 				const errorText = await res.text();
 				try {
 					const errJson = JSON.parse(errorText);
-					errorMessage = errJson.error || 'Gagal mereset password.';
+					errorMessage = errJson.error || 'Gagal mengatur ulang kata sandi.';
 				} catch {
 					errorMessage = errorText || 'Terjadi kesalahan pada server.';
 				}
@@ -62,7 +62,7 @@
 			}
 
 			const data = await res.json();
-			successMessage = data.message || 'Password berhasil diubah!';
+			successMessage = data.message || 'Kata sandi berhasil diubah!';
 
 			// Redirect otomatis ke halaman login guru setelah 3 detik
 			setTimeout(() => {
@@ -98,7 +98,7 @@
 				</svg>
 			</div>
 			<h1 class="text-2xl font-black tracking-tight text-slate-800 uppercase">Buat Sandi Baru</h1>
-			<p class="text-sm font-medium text-slate-400">Silakan masukkan password baru Anda</p>
+			<p class="text-sm font-medium text-slate-400">Masukkan kata sandi baru untuk akun Anda</p>
 		</div>
 
 		{#if errorMessage}
@@ -121,7 +121,7 @@
 					<label
 						for="newPassword"
 						class="ml-1 text-xs font-black tracking-wider text-slate-500 uppercase"
-						>Password Baru</label
+						>Kata sandi baru</label
 					>
 					<div class="relative">
 						<input
@@ -172,7 +172,7 @@
 					<label
 						for="confirmPassword"
 						class="ml-1 text-xs font-black tracking-wider text-slate-500 uppercase"
-						>Konfirmasi Password</label
+						>Konfirmasi kata sandi</label
 					>
 					<input
 						type={showPassword ? 'text' : 'password'}
@@ -194,7 +194,7 @@
 							class="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"
 						></span>
 					{:else}
-						Simpan Password
+						Simpan kata sandi
 					{/if}
 				</button>
 			</form>

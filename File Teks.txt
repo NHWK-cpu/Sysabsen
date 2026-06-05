@@ -1,0 +1,1 @@
+ (rapikan dokumen dari Swagger yang ada): tetap pakai Swagger saat ini sebagai acuan, lalu aku buat/rapikan dokumentasi tertulis backend (mis. Backend/README.md atau Backend/API.md) tanpa menambah endpoint baru di Swagger.

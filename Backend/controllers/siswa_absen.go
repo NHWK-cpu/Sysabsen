@@ -92,24 +92,44 @@ func SubmitAbsen(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if claims, ok := tokenQR.Claims.(jwt.MapClaims); ok && tokenQR.Valid {
-		// A. Pastikan ini benar-benar token QR, bukan token login yang diselundupkan
-		if claims["tipe"] != "qr_absen" {
-			http.Error(w, `{"error": "Tipe QR Code salah!"}`, http.StatusForbidden)
-			return
-		}
+        // A. Pastikan ini benar-benar token QR...
+        if claims["tipe"] != "qr_absen" {
+            http.Error(w, `{"error": "Tipe QR Code salah!"}`, http.StatusForbidden)
+            return
+        }
 
-		// B. Pastikan QR yang di-scan sesuai dengan kelas yang sedang diakses
-		qrSesiID := fmt.Sprintf("%v", claims["sesi_id"]) // Ubah ke string untuk jaga-jaga
-		inputSesiID := fmt.Sprintf("%d", input.SesiID)
+        // B. Pastikan QR yang di-scan sesuai dengan kelas...
+        qrSesiID := fmt.Sprintf("%v", claims["sesi_id"]) 
+        inputSesiID := fmt.Sprintf("%d", input.SesiID)
 
-		if qrSesiID != inputSesiID {
-			http.Error(w, `{"error": "QR Code ini untuk kelas/sesi yang berbeda!"}`, http.StatusForbidden)
-			return
-		}
-	} else {
-		http.Error(w, `{"error": "Data QR Code rusak"}`, http.StatusForbidden)
-		return
-	}
+        if qrSesiID != inputSesiID {
+            http.Error(w, `{"error": "QR Code ini untuk kelas/sesi yang berbeda!"}`, http.StatusForbidden)
+            return
+        }
+    } else {
+        http.Error(w, `{"error": "Data QR Code rusak"}`, http.StatusForbidden)
+        return
+    }
+
+    // ==========================================
+    // Validasi Lintas Kelas
+    // ==========================================
+    var kelasID int
+    errSesi := config.DB.QueryRow("SELECT kelas_id FROM sesi_pembelajaran WHERE id = ?", input.SesiID).Scan(&kelasID)
+    if errSesi != nil {
+        http.Error(w, `{"error": "Sesi pembelajaran tidak ditemukan atau sudah tidak valid."}`, http.StatusNotFound)
+        return
+    }
+
+    var isTerdaftar int
+    // Menggunakan siswaID dan kelasID
+    errCek := config.DB.QueryRow("SELECT COUNT(*) FROM siswa_kelas WHERE siswa_id = ? AND kelas_id = ?", siswaID, kelasID).Scan(&isTerdaftar)
+
+    if errCek != nil || isTerdaftar == 0 {
+        http.Error(w, `{"error": "Akses ditolak: Anda terdeteksi tidak terdaftar di kelas ini!"}`, http.StatusForbidden)
+        return
+    }
+    // ==========================================
 
 	// 4. CEK APAKAH SUDAH ABSEN SEBELUMNYA
 	var sudahAbsen int

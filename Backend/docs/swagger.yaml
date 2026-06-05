@@ -1,602 +1,2653 @@
-definitions:
-  controllers.AbsenRequest:
-    properties:
-      latitude:
-        example: -7.250446
-        type: number
-      longitude:
-        example: 112.768846
-        type: number
-      qr_token:
-        example: eyJhbGciOiJIUzI1NiIs...
-        type: string
-      sesi_id:
-        example: 1
-        type: integer
-    type: object
-  controllers.AdminStatsResponse:
-    properties:
-      akun_aktif:
-        example: 142
-        type: integer
-      akun_inaktif:
-        example: 8
-        type: integer
-      pending_device:
-        example: 3
-        type: integer
-      total_akun:
-        example: 150
-        type: integer
-    type: object
-  controllers.CreateKelasReq:
-    properties:
-      nama_kelas:
-        example: XII RPL 1
-        type: string
-    type: object
-  controllers.CreateMapelReq:
-    properties:
-      nama_mapel:
-        example: Pemrograman Web & Perangkat Bergerak
-        type: string
-    type: object
-  controllers.DeviceActionReq:
-    properties:
-      device_id:
-        example: 1
-        type: integer
-    type: object
-  controllers.ErrorMessage:
-    properties:
-      error:
-        example: 'Terjadi kesalahan: data tidak valid'
-        type: string
-    type: object
-  controllers.GuruQRResponse:
-    properties:
-      message:
-        example: QR Code berhasil dibuat, berlaku 30 detik!
-        type: string
-      qr_token:
-        example: eyJhbGciOiJIUzI1NiIsInR5cCI6...
-        type: string
-    type: object
-  controllers.GuruStatsResponse:
-    properties:
-      absent_today:
-        example: 2
-        type: integer
-      attendance_rate:
-        example: 93.33
-        type: number
-      present_today:
-        example: 28
-        type: integer
-      total_students:
-        example: 30
-        type: integer
-    type: object
-  controllers.JadwalGuru:
-    properties:
-      id:
-        example: 1
-        type: integer
-      kelas:
-        example: XII RPL 1
-        type: string
-      mata_pelajaran:
-        example: Pemrograman Web
-        type: string
-      waktu_mulai:
-        example: "08:00"
-        type: string
-      waktu_selesai:
-        example: "10:00"
-        type: string
-    type: object
-  controllers.LoginRequest:
-    properties:
-      password:
-        example: rahasia123
-        type: string
-      username:
-        example: admin_utama
-        type: string
-    type: object
-  controllers.LoginSiswaRequest:
-    properties:
-      device_token:
-        example: hp-hafizh-xyz-123
-        type: string
-      password:
-        example: password123
-        type: string
-      username:
-        example: siswa01
-        type: string
-    type: object
-  controllers.LoginSiswaResponse:
-    properties:
-      data:
-        properties:
-          role:
-            example: siswa
-            type: string
-          token:
-            example: eyJhbGciOiJIUzI1NiIsInR5cCI6Ikp...
-            type: string
-        type: object
-      message:
-        example: Login berhasil!
-        type: string
-      status:
-        example: success
-        type: string
-    type: object
-  controllers.ResetPassSiswaReq:
-    properties:
-      kata_kunci:
-        example: KucingKu
-        type: string
-      new_password:
-        example: SandiBaru123
-        type: string
-      nis:
-        example: "22010101"
-        type: string
-    type: object
-  controllers.ResetPasswordReq:
-    properties:
-      new_password:
-        example: PasswordBaru123!
-        type: string
-      token:
-        example: 817cdc18e67140e57f62dd6c80fd52529...
-        type: string
-    type: object
-  controllers.RiwayatAbsenSiswa:
-    properties:
-      mapel:
-        example: Matematika
-        type: string
-      status:
-        example: hadir
-        type: string
-      tanggal:
-        example: "2026-04-08"
-        type: string
-    type: object
-  controllers.SiswaData:
-    properties:
-      email:
-        example: hafizh@example.com
-        type: string
-      id:
-        example: 1
-        type: integer
-      nama_lengkap:
-        example: Hafizh Junior
-        type: string
-      nis:
-        example: "22010101"
-        type: string
-    type: object
-  controllers.StudentStatusList:
-    properties:
-      nama:
-        example: Hafizh Junior
-        type: string
-      nis:
-        example: "22010101"
-        type: string
-      status:
-        example: hadir
-        type: string
-      waktu_absen:
-        example: "2026-04-08 09:15:00"
-        type: string
-    type: object
-  controllers.SuccessMessage:
-    properties:
-      message:
-        example: Aksi berhasil dilakukan!
-        type: string
-    type: object
+swagger: '2.0'
 info:
-  contact:
-    email: hafizh@example.com
-    name: Hafizh
   description: Ini adalah dokumentasi REST API untuk aplikasi absensi dengan fitur
     QR & Geofencing.
-  termsOfService: http://swagger.io/terms/
   title: API Sistem Absensi Tempat Les
-  version: "1.0"
+  termsOfService: http://swagger.io/terms/
+  contact:
+    name: Hafizh
+    email: hafizh@example.com
+  version: '1.0'
 paths:
+  /admin/backup:
+    post:
+      summary: Cadangkan Backup
+      description: Cadangkan Backup pada modul backend absensi.
+      tags:
+      - 4. Admin - Dashboard & Device
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Aksi berhasil dilakukan
+          schema:
+            $ref: '#/definitions/controllers.SuccessMessage'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      consumes:
+      - application/json
+      security:
+      - BearerAuth: []
+      operationId: post_admin_backup
   /admin/dashboard/stats:
     get:
+      security:
+      - BearerAuth: []
       description: Menampilkan jumlah total akun, akun aktif (90 hari), inaktif, dan
         antrean device
       produces:
       - application/json
+      tags:
+      - 4. Admin - Dashboard & Device
+      summary: Statistik Dashboard Admin
       responses:
-        "200":
+        '200':
           description: Data Statistik
           schema:
             $ref: '#/definitions/controllers.AdminStatsResponse'
-      security:
-      - BearerAuth: []
-      summary: Statistik Dashboard Admin
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      operationId: get_admin_dashboard_stats
+  /admin/device/approve:
+    post:
+      summary: Setujui Device
+      description: Setujui Device pada modul backend absensi.
       tags:
       - 4. Admin - Dashboard & Device
-  /admin/device/reject:
-    post:
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Aksi berhasil dilakukan
+          schema:
+            $ref: '#/definitions/controllers.SuccessMessage'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
       consumes:
       - application/json
+      security:
+      - BearerAuth: []
+      operationId: post_admin_device_approve
+      parameters:
+      - name: request
+        in: body
+        required: true
+        description: ID perangkat
+        schema:
+          $ref: '#/definitions/controllers.DeviceActionReq'
+  /admin/device/pending:
+    get:
+      summary: Daftar Pending Device
+      description: Daftar Pending Device pada modul backend absensi.
+      tags:
+      - 4. Admin - Dashboard & Device
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Data berhasil diambil
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      security:
+      - BearerAuth: []
+      operationId: get_admin_device_pending
+  /admin/device/reject:
+    post:
+      security:
+      - BearerAuth: []
       description: Menolak akses login dari HP yang tidak dikenal
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      tags:
+      - 4. Admin - Dashboard & Device
+      summary: Tolak Perangkat Siswa
       parameters:
       - description: ID Perangkat
-        in: body
         name: request
+        in: body
         required: true
         schema:
           $ref: '#/definitions/controllers.DeviceActionReq'
-      produces:
-      - application/json
       responses:
-        "200":
+        '200':
           description: Perangkat Ditolak
           schema:
             $ref: '#/definitions/controllers.SuccessMessage'
-      security:
-      - BearerAuth: []
-      summary: Tolak Perangkat Siswa
-      tags:
-      - 4. Admin - Dashboard & Device
-  /admin/kelas/create:
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      operationId: post_admin_device_reject
+  /admin/guru/create:
     post:
+      summary: Buat Guru
+      description: Buat Guru pada modul backend absensi.
+      tags:
+      - 5. Admin - Master Data
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Aksi berhasil dilakukan
+          schema:
+            $ref: '#/definitions/controllers.SuccessMessage'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
       consumes:
       - application/json
+      security:
+      - BearerAuth: []
+      operationId: post_admin_guru_create
+  /admin/guru/delete:
+    delete:
+      summary: Hapus Guru
+      description: Hapus Guru pada modul backend absensi.
+      tags:
+      - 5. Admin - Master Data
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Aksi berhasil dilakukan
+          schema:
+            $ref: '#/definitions/controllers.SuccessMessage'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      consumes:
+      - application/json
+      security:
+      - BearerAuth: []
+      operationId: delete_admin_guru_delete
+  /admin/guru/update:
+    put:
+      summary: Perbarui Guru
+      description: Perbarui Guru pada modul backend absensi.
+      tags:
+      - 5. Admin - Master Data
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Aksi berhasil dilakukan
+          schema:
+            $ref: '#/definitions/controllers.SuccessMessage'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      consumes:
+      - application/json
+      security:
+      - BearerAuth: []
+      operationId: put_admin_guru_update
+  /admin/kelas/all:
+    get:
+      summary: Ambil Semua Kelas
+      description: Ambil Semua Kelas pada modul backend absensi.
+      tags:
+      - 5. Admin - Master Data
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Data berhasil diambil
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      security:
+      - BearerAuth: []
+      operationId: get_admin_kelas_all
+  /admin/kelas/create:
+    post:
+      security:
+      - BearerAuth: []
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      tags:
+      - 5. Admin - Master Data
+      summary: Tambah Kelas Baru
       parameters:
       - description: Nama Kelas
-        in: body
         name: request
+        in: body
         required: true
         schema:
           $ref: '#/definitions/controllers.CreateKelasReq'
-      produces:
-      - application/json
       responses:
-        "200":
+        '200':
           description: Kelas berhasil ditambahkan
           schema:
             $ref: '#/definitions/controllers.SuccessMessage'
-      security:
-      - BearerAuth: []
-      summary: Tambah Kelas Baru
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      operationId: post_admin_kelas_create
+      description: Buat Kelas pada modul backend absensi.
+  /admin/kelas/delete:
+    delete:
+      summary: Hapus Kelas
+      description: Hapus Kelas pada modul backend absensi.
       tags:
       - 5. Admin - Master Data
-  /admin/mapel/create:
-    post:
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Aksi berhasil dilakukan
+          schema:
+            $ref: '#/definitions/controllers.SuccessMessage'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
       consumes:
       - application/json
+      security:
+      - BearerAuth: []
+      operationId: delete_admin_kelas_delete
+  /admin/kelas/remove-wali:
+    delete:
+      summary: Remove Wali Kelas
+      description: Remove Wali Kelas pada modul backend absensi.
+      tags:
+      - 5. Admin - Master Data
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Aksi berhasil dilakukan
+          schema:
+            $ref: '#/definitions/controllers.SuccessMessage'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      consumes:
+      - application/json
+      security:
+      - BearerAuth: []
+      operationId: delete_admin_kelas_remove_wali
+  /admin/kelas/set-wali:
+    put:
+      summary: Set Wali Kelas
+      description: Set Wali Kelas pada modul backend absensi.
+      tags:
+      - 5. Admin - Master Data
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Aksi berhasil dilakukan
+          schema:
+            $ref: '#/definitions/controllers.SuccessMessage'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      consumes:
+      - application/json
+      security:
+      - BearerAuth: []
+      operationId: put_admin_kelas_set_wali
+  /admin/kelas/siswa:
+    get:
+      summary: Siswa Kelas
+      description: Siswa Kelas pada modul backend absensi.
+      tags:
+      - 5. Admin - Master Data
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Data berhasil diambil
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      security:
+      - BearerAuth: []
+      operationId: get_admin_kelas_siswa
+  /admin/kelas/update:
+    put:
+      summary: Perbarui Kelas
+      description: Perbarui Kelas pada modul backend absensi.
+      tags:
+      - 5. Admin - Master Data
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Aksi berhasil dilakukan
+          schema:
+            $ref: '#/definitions/controllers.SuccessMessage'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      consumes:
+      - application/json
+      security:
+      - BearerAuth: []
+      operationId: put_admin_kelas_update
+  /admin/mapel/all:
+    get:
+      summary: Ambil Semua Mapel
+      description: Ambil Semua Mapel pada modul backend absensi.
+      tags:
+      - 5. Admin - Master Data
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Data berhasil diambil
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      security:
+      - BearerAuth: []
+      operationId: get_admin_mapel_all
+  /admin/mapel/create:
+    post:
+      security:
+      - BearerAuth: []
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      tags:
+      - 5. Admin - Master Data
+      summary: Tambah Mata Pelajaran Baru
       parameters:
       - description: Nama Mapel
-        in: body
         name: request
+        in: body
         required: true
         schema:
           $ref: '#/definitions/controllers.CreateMapelReq'
-      produces:
-      - application/json
       responses:
-        "200":
+        '200':
           description: Mapel berhasil ditambahkan
           schema:
             $ref: '#/definitions/controllers.SuccessMessage'
-      security:
-      - BearerAuth: []
-      summary: Tambah Mata Pelajaran Baru
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      operationId: post_admin_mapel_create
+      description: Buat Mapel pada modul backend absensi.
+  /admin/mapel/delete:
+    delete:
+      summary: Hapus Mapel
+      description: Hapus Mapel pada modul backend absensi.
       tags:
       - 5. Admin - Master Data
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Aksi berhasil dilakukan
+          schema:
+            $ref: '#/definitions/controllers.SuccessMessage'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      consumes:
+      - application/json
+      security:
+      - BearerAuth: []
+      operationId: delete_admin_mapel_delete
+  /admin/mapel/status:
+    put:
+      summary: Ubah Status Mapel
+      description: Ubah Status Mapel pada modul backend absensi.
+      tags:
+      - 5. Admin - Master Data
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Aksi berhasil dilakukan
+          schema:
+            $ref: '#/definitions/controllers.SuccessMessage'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      consumes:
+      - application/json
+      security:
+      - BearerAuth: []
+      operationId: put_admin_mapel_status
+  /admin/mapel/update:
+    put:
+      summary: Perbarui Mapel
+      description: Perbarui Mapel pada modul backend absensi.
+      tags:
+      - 5. Admin - Master Data
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Aksi berhasil dilakukan
+          schema:
+            $ref: '#/definitions/controllers.SuccessMessage'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      consumes:
+      - application/json
+      security:
+      - BearerAuth: []
+      operationId: put_admin_mapel_update
+  /admin/periode/all:
+    get:
+      summary: Ambil Semua Periode
+      description: Ambil Semua Periode pada modul backend absensi.
+      tags:
+      - 5. Admin - Master Data
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Data berhasil diambil
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      security:
+      - BearerAuth: []
+      operationId: get_admin_periode_all
+  /admin/periode/create:
+    post:
+      summary: Buat Periode
+      description: Buat Periode pada modul backend absensi.
+      tags:
+      - 5. Admin - Master Data
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Aksi berhasil dilakukan
+          schema:
+            $ref: '#/definitions/controllers.SuccessMessage'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      consumes:
+      - application/json
+      security:
+      - BearerAuth: []
+      operationId: post_admin_periode_create
+  /admin/periode/delete:
+    delete:
+      summary: Hapus Periode
+      description: Hapus Periode pada modul backend absensi.
+      tags:
+      - 5. Admin - Master Data
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Aksi berhasil dilakukan
+          schema:
+            $ref: '#/definitions/controllers.SuccessMessage'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      consumes:
+      - application/json
+      security:
+      - BearerAuth: []
+      operationId: delete_admin_periode_delete
+  /admin/periode/update:
+    put:
+      summary: Perbarui Periode
+      description: Perbarui Periode pada modul backend absensi.
+      tags:
+      - 5. Admin - Master Data
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Aksi berhasil dilakukan
+          schema:
+            $ref: '#/definitions/controllers.SuccessMessage'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      consumes:
+      - application/json
+      security:
+      - BearerAuth: []
+      operationId: put_admin_periode_update
+  /admin/restore:
+    post:
+      summary: Pulihkan Restore
+      description: Pulihkan Restore pada modul backend absensi.
+      tags:
+      - 4. Admin - Dashboard & Device
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Aksi berhasil dilakukan
+          schema:
+            $ref: '#/definitions/controllers.SuccessMessage'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      consumes:
+      - application/json
+      security:
+      - BearerAuth: []
+      operationId: post_admin_restore
+  /admin/siswa-kelas/assign:
+    post:
+      summary: Assign Siswa-Kelas
+      description: Assign Siswa-Kelas pada modul backend absensi.
+      tags:
+      - 5. Admin - Master Data
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Aksi berhasil dilakukan
+          schema:
+            $ref: '#/definitions/controllers.SuccessMessage'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      consumes:
+      - application/json
+      security:
+      - BearerAuth: []
+      operationId: post_admin_siswa_kelas_assign
+  /admin/siswa-kelas/list:
+    post:
+      summary: Daftar Siswa-Kelas
+      description: Daftar Siswa-Kelas pada modul backend absensi.
+      tags:
+      - 5. Admin - Master Data
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Aksi berhasil dilakukan
+          schema:
+            $ref: '#/definitions/controllers.SuccessMessage'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      consumes:
+      - application/json
+      security:
+      - BearerAuth: []
+      operationId: post_admin_siswa_kelas_list
+      parameters:
+      - name: kelas_id
+        in: query
+        required: true
+        type: integer
+        description: ID kelas
+  /admin/siswa-kelas/remove:
+    delete:
+      summary: Lepas Siswa-Kelas
+      description: Lepas Siswa-Kelas pada modul backend absensi.
+      tags:
+      - 5. Admin - Master Data
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Aksi berhasil dilakukan
+          schema:
+            $ref: '#/definitions/controllers.SuccessMessage'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      consumes:
+      - application/json
+      security:
+      - BearerAuth: []
+      operationId: delete_admin_siswa_kelas_remove
+      parameters:
+      - name: siswa_id
+        in: query
+        required: true
+        type: integer
+        description: ID siswa
+      - name: kelas_id
+        in: query
+        required: true
+        type: integer
+        description: ID kelas
+  /admin/siswa-kelas/reset-absen:
+    delete:
+      summary: Reset Absen Siswa-Kelas
+      description: Reset Absen Siswa-Kelas pada modul backend absensi.
+      tags:
+      - 5. Admin - Master Data
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Aksi berhasil dilakukan
+          schema:
+            $ref: '#/definitions/controllers.SuccessMessage'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      consumes:
+      - application/json
+      security:
+      - BearerAuth: []
+      operationId: delete_admin_siswa_kelas_reset_absen
+      parameters:
+      - name: siswa_id
+        in: query
+        required: true
+        type: integer
+        description: ID siswa
+      - name: kelas_id
+        in: query
+        required: true
+        type: integer
+        description: ID kelas
+  /admin/siswa-kelas/update:
+    put:
+      summary: Perbarui Siswa-Kelas
+      description: Perbarui Siswa-Kelas pada modul backend absensi.
+      tags:
+      - 5. Admin - Master Data
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Aksi berhasil dilakukan
+          schema:
+            $ref: '#/definitions/controllers.SuccessMessage'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      consumes:
+      - application/json
+      security:
+      - BearerAuth: []
+      operationId: put_admin_siswa_kelas_update
   /admin/siswa/all:
     get:
+      security:
+      - BearerAuth: []
       description: Mengambil daftar seluruh data master siswa
       produces:
       - application/json
-      responses:
-        "200":
-          description: Data Siswa
-          schema:
-            items:
-              $ref: '#/definitions/controllers.SiswaData'
-            type: array
-      security:
-      - BearerAuth: []
-      summary: Tampilkan Semua Data Siswa
       tags:
       - 5. Admin - Master Data
-  /admin/siswa/reset-password:
+      summary: Tampilkan Semua Data Siswa
+      responses:
+        '200':
+          description: Data Siswa
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/controllers.SiswaData'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      operationId: get_admin_siswa_all
+  /admin/siswa/approve-registration:
     post:
+      summary: Approve Registration Siswa
+      description: Approve Registration Siswa pada modul backend absensi.
+      tags:
+      - 5. Admin - Master Data
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Aksi berhasil dilakukan
+          schema:
+            $ref: '#/definitions/controllers.SuccessMessage'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
       consumes:
       - application/json
+      security:
+      - BearerAuth: []
+      operationId: post_admin_siswa_approve_registration
+  /admin/siswa/clue:
+    get:
+      summary: Clue Siswa
+      description: Clue Siswa pada modul backend absensi.
+      tags:
+      - 5. Admin - Master Data
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Data berhasil diambil
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      security:
+      - BearerAuth: []
+      operationId: get_admin_siswa_clue
+      parameters:
+      - name: siswa_id
+        in: query
+        required: true
+        type: integer
+        description: ID siswa
+  /admin/siswa/create:
+    post:
+      summary: Buat Siswa
+      description: Buat Siswa pada modul backend absensi.
+      tags:
+      - 5. Admin - Master Data
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Aksi berhasil dilakukan
+          schema:
+            $ref: '#/definitions/controllers.SuccessMessage'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      consumes:
+      - application/json
+      security:
+      - BearerAuth: []
+      operationId: post_admin_siswa_create
+  /admin/siswa/delete:
+    delete:
+      summary: Hapus Siswa
+      description: Hapus Siswa pada modul backend absensi.
+      tags:
+      - 5. Admin - Master Data
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Aksi berhasil dilakukan
+          schema:
+            $ref: '#/definitions/controllers.SuccessMessage'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      consumes:
+      - application/json
+      security:
+      - BearerAuth: []
+      operationId: delete_admin_siswa_delete
+  /admin/siswa/import:
+    post:
+      summary: Import Siswa
+      description: Import Siswa pada modul backend absensi.
+      tags:
+      - 5. Admin - Master Data
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Aksi berhasil dilakukan
+          schema:
+            $ref: '#/definitions/controllers.SuccessMessage'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      consumes:
+      - multipart/form-data
+      security:
+      - BearerAuth: []
+      operationId: post_admin_siswa_import
+      parameters:
+      - name: file_excel
+        in: formData
+        required: true
+        type: file
+        description: File Excel .xlsx
+  /admin/siswa/pending-registrations:
+    get:
+      summary: Pending Registrations Siswa
+      description: Pending Registrations Siswa pada modul backend absensi.
+      tags:
+      - 5. Admin - Master Data
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Data berhasil diambil
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      security:
+      - BearerAuth: []
+      operationId: get_admin_siswa_pending_registrations
+  /admin/siswa/reject-registration:
+    post:
+      summary: Reject Registration Siswa
+      description: Reject Registration Siswa pada modul backend absensi.
+      tags:
+      - 5. Admin - Master Data
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Aksi berhasil dilakukan
+          schema:
+            $ref: '#/definitions/controllers.SuccessMessage'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      consumes:
+      - application/json
+      security:
+      - BearerAuth: []
+      operationId: post_admin_siswa_reject_registration
+  /admin/siswa/reset-password:
+    post:
+      security:
+      - BearerAuth: []
       description: Admin mereset password siswa dengan validasi Kata Kunci Rahasia
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      tags:
+      - 1. Auth & Keamanan
+      summary: Reset Password Siswa (Lupa Password)
       parameters:
       - description: Data Reset
-        in: body
         name: request
+        in: body
         required: true
         schema:
           $ref: '#/definitions/controllers.ResetPassSiswaReq'
-      produces:
-      - application/json
       responses:
-        "200":
+        '200':
           description: Password berhasil direset
           schema:
             $ref: '#/definitions/controllers.SuccessMessage'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      operationId: post_admin_siswa_reset_password
+  /admin/siswa/update:
+    put:
+      summary: Perbarui Siswa
+      description: Perbarui Siswa pada modul backend absensi.
+      tags:
+      - 5. Admin - Master Data
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Aksi berhasil dilakukan
+          schema:
+            $ref: '#/definitions/controllers.SuccessMessage'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      consumes:
+      - application/json
       security:
       - BearerAuth: []
-      summary: Reset Password Siswa (Lupa Password)
+      operationId: put_admin_siswa_update
+  /admin/users/all:
+    get:
+      summary: Ambil Semua Users
+      description: Ambil Semua Users pada modul backend absensi.
       tags:
-      - 4. Admin - Device & Keamanan
+      - 5. Admin - Master Data
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Data berhasil diambil
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      security:
+      - BearerAuth: []
+      operationId: get_admin_users_all
+  /admin/users/inactive:
+    get:
+      summary: Inactive Users
+      description: Inactive Users pada modul backend absensi.
+      tags:
+      - 5. Admin - Master Data
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Data berhasil diambil
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      security:
+      - BearerAuth: []
+      operationId: get_admin_users_inactive
+  /dashboard:
+    post:
+      summary: Dashboard Sistem
+      description: Dashboard Sistem pada modul backend absensi.
+      tags:
+      - Lainnya
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Aksi berhasil dilakukan
+          schema:
+            $ref: '#/definitions/controllers.SuccessMessage'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      consumes:
+      - application/json
+      security:
+      - BearerAuth: []
+      operationId: post_dashboard
+  /guru/absen:
+    post:
+      summary: Absen Absen
+      description: Absen Absen pada modul backend absensi.
+      tags:
+      - 3. Operasional Guru
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Aksi berhasil dilakukan
+          schema:
+            $ref: '#/definitions/controllers.SuccessMessage'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      consumes:
+      - application/json
+      security:
+      - BearerAuth: []
+      operationId: post_guru_absen
   /guru/backup:
     get:
+      security:
+      - BearerAuth: []
       description: Melakukan dump SQL dan mengunggahnya otomatis ke folder Drive
       produces:
       - application/json
+      tags:
+      - 3. Operasional Guru
+      summary: Backup Database ke Google Drive
       responses:
-        "200":
+        '200':
           description: Backup Berhasil Diupload
           schema:
             $ref: '#/definitions/controllers.SuccessMessage'
-      security:
-      - BearerAuth: []
-      summary: Backup Database ke Google Drive
-      tags:
-      - 3. Operasional Guru
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      operationId: get_guru_backup
   /guru/dashboard/attendance-list:
     get:
-      description: Menampilkan daftar nama siswa dan status absensinya (Hadir/Belum)
-      parameters:
-      - description: ID Sesi Pembelajaran
-        in: query
-        name: sesi_id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Daftar Kehadiran
-          schema:
-            items:
-              $ref: '#/definitions/controllers.StudentStatusList'
-            type: array
       security:
       - BearerAuth: []
-      summary: Detail Status Kehadiran Per Siswa
-      tags:
-      - 3. Operasional Guru
-  /guru/dashboard/stats:
-    get:
-      description: Menampilkan total murid terdaftar, hadir, dan rasio kehadiran
-      parameters:
-      - description: ID Sesi Pembelajaran
-        in: query
-        name: sesi_id
-        required: true
-        type: integer
+      description: Menampilkan daftar nama siswa dan status absensinya (Hadir/Belum)
       produces:
       - application/json
+      tags:
+      - 3. Operasional Guru
+      summary: Detail Status Kehadiran Per Siswa
+      parameters:
+      - type: integer
+        description: ID Sesi Pembelajaran
+        name: sesi_id
+        in: query
+        required: true
       responses:
-        "200":
+        '200':
+          description: Daftar Kehadiran
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/controllers.StudentStatusList'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      operationId: get_guru_dashboard_attendance_list
+  /guru/dashboard/stats:
+    get:
+      security:
+      - BearerAuth: []
+      description: Menampilkan total murid terdaftar, hadir, dan rasio kehadiran
+      produces:
+      - application/json
+      tags:
+      - 3. Operasional Guru
+      summary: Ringkasan Statistik Kelas
+      parameters:
+      - type: integer
+        description: ID Sesi Pembelajaran
+        name: sesi_id
+        in: query
+        required: true
+      responses:
+        '200':
           description: Data Ditemukan
           schema:
             $ref: '#/definitions/controllers.GuruStatsResponse'
-      security:
-      - BearerAuth: []
-      summary: Ringkasan Statistik Kelas
-      tags:
-      - 3. Operasional Guru
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      operationId: get_guru_dashboard_stats
   /guru/export:
     get:
+      security:
+      - BearerAuth: []
       description: Otomatis mengunduh file Excel laporan absensi dan mem-backup ke
         G-Drive
       produces:
       - application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+      tags:
+      - 3. Operasional Guru
+      summary: Download Laporan Excel
       responses:
-        "200":
+        '200':
           description: File Downloaded
           schema:
             type: file
-      security:
-      - BearerAuth: []
-      summary: Download Laporan Excel
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      operationId: get_guru_export
+  /guru/forgot-password:
+    post:
+      summary: Forgot Password Forgot-Password
+      description: Forgot Password Forgot-Password pada modul backend absensi.
       tags:
-      - 3. Operasional Guru
-  /guru/generate-qr:
-    get:
-      description: Menghasilkan JWT token beralaku 30 detik untuk diubah jadi gambar
-        QR
-      parameters:
-      - description: ID Sesi Pembelajaran
-        in: query
-        name: sesi_id
-        required: true
-        type: integer
+      - 1. Auth & Keamanan
       produces:
       - application/json
       responses:
-        "200":
+        '200':
+          description: Aksi berhasil dilakukan
+          schema:
+            $ref: '#/definitions/controllers.SuccessMessage'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      consumes:
+      - application/json
+      operationId: post_guru_forgot_password
+  /guru/generate-qr:
+    get:
+      security:
+      - BearerAuth: []
+      description: Menghasilkan JWT token beralaku 30 detik untuk diubah jadi gambar
+        QR
+      produces:
+      - application/json
+      tags:
+      - 3. Operasional Guru
+      summary: Tampilkan QR Code (Guru)
+      parameters:
+      - type: integer
+        description: ID Sesi Pembelajaran
+        name: sesi_id
+        in: query
+        required: true
+      responses:
+        '200':
           description: Sukses Membuat QR
           schema:
             $ref: '#/definitions/controllers.GuruQRResponse'
-      security:
-      - BearerAuth: []
-      summary: Tampilkan QR Code (Guru)
-      tags:
-      - 3. Operasional Guru
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      operationId: get_guru_generate_qr
   /guru/jadwal:
     get:
+      security:
+      - BearerAuth: []
       description: Menampilkan sesi pembelajaran berdasarkan guru yang sedang login
       produces:
       - application/json
-      responses:
-        "200":
-          description: Daftar Jadwal
-          schema:
-            items:
-              $ref: '#/definitions/controllers.JadwalGuru'
-            type: array
-      security:
-      - BearerAuth: []
-      summary: Jadwal Mengajar Guru
       tags:
       - 3. Operasional Guru
+      summary: Jadwal Mengajar Guru
+      responses:
+        '200':
+          description: Daftar Jadwal
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/controllers.JadwalGuru'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      operationId: get_guru_jadwal
+  /guru/kelas:
+    get:
+      summary: Kelas Kelas
+      description: Kelas Kelas pada modul backend absensi.
+      tags:
+      - 3. Operasional Guru
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Data berhasil diambil
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      security:
+      - BearerAuth: []
+      operationId: get_guru_kelas
+  /guru/kelas/siswa:
+    get:
+      summary: Siswa Kelas
+      description: Siswa Kelas pada modul backend absensi.
+      tags:
+      - 3. Operasional Guru
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Data berhasil diambil
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      security:
+      - BearerAuth: []
+      operationId: get_guru_kelas_siswa
+      parameters:
+      - name: kelas_id
+        in: query
+        required: true
+        type: integer
+        description: ID kelas
+  /guru/mapel:
+    get:
+      summary: Mapel Mapel
+      description: Mapel Mapel pada modul backend absensi.
+      tags:
+      - 3. Operasional Guru
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Data berhasil diambil
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      security:
+      - BearerAuth: []
+      operationId: get_guru_mapel
   /guru/reset-password:
     post:
+      description: Mengganti kata sandi guru menggunakan token rahasia
       consumes:
       - application/json
-      description: Mengganti kata sandi guru menggunakan token rahasia
+      produces:
+      - application/json
+      tags:
+      - 1. Auth & Keamanan
+      summary: Eksekusi Reset Password
       parameters:
       - description: Token dan Password Baru
-        in: body
         name: request
+        in: body
         required: true
         schema:
           $ref: '#/definitions/controllers.ResetPasswordReq'
-      produces:
-      - application/json
       responses:
-        "200":
+        '200':
           description: Password berhasil diubah
           schema:
             $ref: '#/definitions/controllers.SuccessMessage'
-      summary: Eksekusi Reset Password
-      tags:
-      - 1. Auth & Keamanan
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      operationId: post_guru_reset_password
   /guru/restore:
     post:
-      consumes:
-      - application/json
+      security:
+      - BearerAuth: []
       description: Mengunduh file SQL dari Drive menggunakan File ID dan menimpanya
         ke database lokal
-      parameters:
-      - description: Google Drive File ID
-        in: query
-        name: file_id
-        required: true
-        type: string
+      consumes:
+      - application/json
       produces:
       - application/json
+      tags:
+      - 3. Operasional Guru
+      summary: Restore Database dari Google Drive
+      parameters:
+      - type: string
+        description: Google Drive File ID
+        name: file_id
+        in: query
+        required: true
       responses:
-        "200":
+        '200':
           description: Database Berhasil Direstore
           schema:
             $ref: '#/definitions/controllers.SuccessMessage'
-      security:
-      - BearerAuth: []
-      summary: Restore Database dari Google Drive
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      operationId: post_guru_restore
+  /guru/sesi/init:
+    post:
+      summary: Inisialisasi Sesi
+      description: Inisialisasi Sesi pada modul backend absensi.
       tags:
       - 3. Operasional Guru
-  /login:
-    post:
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Aksi berhasil dilakukan
+          schema:
+            $ref: '#/definitions/controllers.SuccessMessage'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
       consumes:
       - application/json
+      security:
+      - BearerAuth: []
+      operationId: post_guru_sesi_init
+  /guru/siswa/all:
+    get:
+      summary: Ambil Semua Siswa
+      description: Ambil Semua Siswa pada modul backend absensi.
+      tags:
+      - 3. Operasional Guru
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Data berhasil diambil
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      security:
+      - BearerAuth: []
+      operationId: get_guru_siswa_all
+  /login:
+    post:
       description: Autentikasi untuk Admin dan Guru mengembalikan token JWT
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      tags:
+      - 1. Auth & Keamanan
+      summary: Login Admin & Guru
       parameters:
       - description: Kredensial Login
-        in: body
         name: request
+        in: body
         required: true
         schema:
           $ref: '#/definitions/controllers.LoginRequest'
-      produces:
-      - application/json
       responses:
-        "200":
+        '200':
           description: Berhasil Login
           schema:
             $ref: '#/definitions/controllers.LoginSiswaResponse'
-      summary: Login Admin & Guru
-      tags:
-      - 1. Auth & Keamanan
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      operationId: post_login
   /login/siswa:
     post:
+      description: Autentikasi siswa dan mendaftarkan ID perangkat (Device Binding)
       consumes:
       - application/json
-      description: Autentikasi siswa dan mendaftarkan ID perangkat (Device Binding)
+      produces:
+      - application/json
+      tags:
+      - 1. Auth & Keamanan
+      summary: Login untuk Siswa
       parameters:
       - description: Payload Data Login
-        in: body
         name: request
+        in: body
         required: true
         schema:
           $ref: '#/definitions/controllers.LoginSiswaRequest'
-      produces:
-      - application/json
       responses:
-        "200":
+        '200':
           description: Berhasil Login
           schema:
             $ref: '#/definitions/controllers.LoginSiswaResponse'
-        "401":
+        '401':
           description: Kredensial Salah
           schema:
             $ref: '#/definitions/controllers.ErrorMessage'
-      summary: Login untuk Siswa
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      operationId: post_login_siswa
+  /register/siswa:
+    post:
+      summary: Siswa Siswa
+      description: Siswa Siswa pada modul backend absensi.
       tags:
       - 1. Auth & Keamanan
-  /siswa/absen/submit:
-    post:
-      consumes:
-      - application/json
-      description: Mengirim token QR dinamis dan koordinat GPS Siswa untuk divalidasi
-      parameters:
-      - description: Kirim Koordinat dan Token
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/controllers.AbsenRequest'
       produces:
       - application/json
       responses:
-        "200":
+        '200':
+          description: Aksi berhasil dilakukan
+          schema:
+            $ref: '#/definitions/controllers.SuccessMessage'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      consumes:
+      - application/json
+      operationId: post_register_siswa
+  /siswa/absen:
+    post:
+      summary: Absen Absen
+      description: Absen Absen pada modul backend absensi.
+      tags:
+      - 2. Operasional Siswa
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Aksi berhasil dilakukan
+          schema:
+            $ref: '#/definitions/controllers.SuccessMessage'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      consumes:
+      - application/json
+      security:
+      - BearerAuth: []
+      operationId: post_siswa_absen
+  /siswa/absen/submit:
+    post:
+      security:
+      - BearerAuth: []
+      description: Mengirim token QR dinamis dan koordinat GPS Siswa untuk divalidasi
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      tags:
+      - 2. Operasional Siswa
+      summary: Submit Absensi Geofencing (Siswa)
+      parameters:
+      - description: Kirim Koordinat dan Token
+        name: request
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.AbsenRequest'
+      responses:
+        '200':
           description: Posisi tervalidasi, Absen Sukses
           schema:
             $ref: '#/definitions/controllers.SuccessMessage'
-        "403":
+        '403':
           description: Di luar jangkauan radius / QR Kadaluwarsa
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      operationId: post_siswa_absen_submit
+  /siswa/riwayat:
+    get:
+      security:
+      - BearerAuth: []
+      description: Menampilkan data historis absensi milik siswa yang sedang login
+      produces:
+      - application/json
+      tags:
+      - 2. Operasional Siswa
+      summary: Riwayat Absensi Siswa
+      responses:
+        '200':
+          description: Daftar Riwayat
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/controllers.RiwayatAbsenSiswa'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      operationId: get_siswa_riwayat
+  /superadmin/admin/all:
+    get:
+      summary: Ambil Semua Admin
+      description: Ambil Semua Admin pada modul backend absensi.
+      tags:
+      - 6. Super Admin
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Data berhasil diambil
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/controllers.ErrorMessage'
       security:
       - BearerAuth: []
-      summary: Submit Absensi Geofencing (Siswa)
+      operationId: get_superadmin_admin_all
+  /superadmin/admin/create:
+    post:
+      summary: Buat Admin
+      description: Buat Admin pada modul backend absensi.
       tags:
-      - 2. Operasional Siswa
-  /siswa/riwayat:
-    get:
-      description: Menampilkan data historis absensi milik siswa yang sedang login
+      - 6. Super Admin
       produces:
       - application/json
       responses:
-        "200":
-          description: Daftar Riwayat
+        '200':
+          description: Aksi berhasil dilakukan
           schema:
-            items:
-              $ref: '#/definitions/controllers.RiwayatAbsenSiswa'
-            type: array
+            $ref: '#/definitions/controllers.SuccessMessage'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      consumes:
+      - application/json
       security:
       - BearerAuth: []
-      summary: Riwayat Absensi Siswa
+      operationId: post_superadmin_admin_create
+  /superadmin/admin/toggle:
+    put:
+      summary: Toggle Admin
+      description: Toggle Admin pada modul backend absensi.
       tags:
-      - 2. Operasional Siswa
+      - 6. Super Admin
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Aksi berhasil dilakukan
+          schema:
+            $ref: '#/definitions/controllers.SuccessMessage'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      consumes:
+      - application/json
+      security:
+      - BearerAuth: []
+      operationId: put_superadmin_admin_toggle
+  /superadmin/admin/update:
+    put:
+      summary: Perbarui Admin
+      description: Perbarui Admin pada modul backend absensi.
+      tags:
+      - 6. Super Admin
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Aksi berhasil dilakukan
+          schema:
+            $ref: '#/definitions/controllers.SuccessMessage'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      consumes:
+      - application/json
+      security:
+      - BearerAuth: []
+      operationId: put_superadmin_admin_update
+  /superadmin/logs:
+    get:
+      summary: Logs Logs
+      description: Logs Logs pada modul backend absensi.
+      tags:
+      - 6. Super Admin
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Data berhasil diambil
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      security:
+      - BearerAuth: []
+      operationId: get_superadmin_logs
+  /superadmin/users/hard-delete:
+    delete:
+      summary: Hapus Permanen Users
+      description: Hapus Permanen Users pada modul backend absensi.
+      tags:
+      - 6. Super Admin
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Aksi berhasil dilakukan
+          schema:
+            $ref: '#/definitions/controllers.SuccessMessage'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      consumes:
+      - application/json
+      security:
+      - BearerAuth: []
+      operationId: delete_superadmin_users_hard_delete
+  /superadmin/users/reactivate:
+    put:
+      summary: Aktifkan Ulang Users
+      description: Aktifkan Ulang Users pada modul backend absensi.
+      tags:
+      - 6. Super Admin
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Aksi berhasil dilakukan
+          schema:
+            $ref: '#/definitions/controllers.SuccessMessage'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorMessage'
+      consumes:
+      - application/json
+      security:
+      - BearerAuth: []
+      operationId: put_superadmin_users_reactivate
+definitions:
+  controllers.AbsenRequest:
+    type: object
+    properties:
+      latitude:
+        type: number
+        example: -7.250446
+      longitude:
+        type: number
+        example: 112.768846
+      qr_token:
+        type: string
+        example: eyJhbGciOiJIUzI1NiIs...
+      sesi_id:
+        type: integer
+        example: 1
+  controllers.AdminStatsResponse:
+    type: object
+    properties:
+      akun_aktif:
+        type: integer
+        example: 142
+      akun_inaktif:
+        type: integer
+        example: 8
+      pending_device:
+        type: integer
+        example: 3
+      total_akun:
+        type: integer
+        example: 150
+  controllers.CreateKelasReq:
+    type: object
+    properties:
+      nama_kelas:
+        type: string
+        example: XII RPL 1
+  controllers.CreateMapelReq:
+    type: object
+    properties:
+      nama_mapel:
+        type: string
+        example: Pemrograman Web & Perangkat Bergerak
+  controllers.DeviceActionReq:
+    type: object
+    properties:
+      device_id:
+        type: integer
+        example: 1
+  controllers.ErrorMessage:
+    type: object
+    properties:
+      error:
+        type: string
+        example: 'Terjadi kesalahan: data tidak valid'
+  controllers.GuruQRResponse:
+    type: object
+    properties:
+      message:
+        type: string
+        example: QR Code berhasil dibuat, berlaku 30 detik!
+      qr_token:
+        type: string
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6...
+  controllers.GuruStatsResponse:
+    type: object
+    properties:
+      absent_today:
+        type: integer
+        example: 2
+      attendance_rate:
+        type: number
+        example: 93.33
+      present_today:
+        type: integer
+        example: 28
+      total_students:
+        type: integer
+        example: 30
+  controllers.JadwalGuru:
+    type: object
+    properties:
+      id:
+        type: integer
+        example: 1
+      kelas:
+        type: string
+        example: XII RPL 1
+      mata_pelajaran:
+        type: string
+        example: Pemrograman Web
+      waktu_mulai:
+        type: string
+        example: 08:00
+      waktu_selesai:
+        type: string
+        example: '10:00'
+  controllers.LoginRequest:
+    type: object
+    properties:
+      password:
+        type: string
+        example: rahasia123
+      username:
+        type: string
+        example: admin_utama
+  controllers.LoginSiswaRequest:
+    type: object
+    properties:
+      device_token:
+        type: string
+        example: hp-hafizh-xyz-123
+      password:
+        type: string
+        example: password123
+      username:
+        type: string
+        example: siswa01
+  controllers.LoginSiswaResponse:
+    type: object
+    properties:
+      data:
+        type: object
+        properties:
+          role:
+            type: string
+            example: siswa
+          token:
+            type: string
+            example: eyJhbGciOiJIUzI1NiIsInR5cCI6Ikp...
+      message:
+        type: string
+        example: Login berhasil!
+      status:
+        type: string
+        example: success
+  controllers.ResetPassSiswaReq:
+    type: object
+    properties:
+      kata_kunci:
+        type: string
+        example: KucingKu
+      new_password:
+        type: string
+        example: SandiBaru123
+      nis:
+        type: string
+        example: '22010101'
+  controllers.ResetPasswordReq:
+    type: object
+    properties:
+      new_password:
+        type: string
+        example: PasswordBaru123!
+      token:
+        type: string
+        example: 817cdc18e67140e57f62dd6c80fd52529...
+  controllers.RiwayatAbsenSiswa:
+    type: object
+    properties:
+      mapel:
+        type: string
+        example: Matematika
+      status:
+        type: string
+        example: hadir
+      tanggal:
+        type: string
+        example: '2026-04-08'
+  controllers.SiswaData:
+    type: object
+    properties:
+      email:
+        type: string
+        example: hafizh@example.com
+      id:
+        type: integer
+        example: 1
+      nama_lengkap:
+        type: string
+        example: Hafizh Junior
+      nis:
+        type: string
+        example: '22010101'
+  controllers.StudentStatusList:
+    type: object
+    properties:
+      nama:
+        type: string
+        example: Hafizh Junior
+      nis:
+        type: string
+        example: '22010101'
+      status:
+        type: string
+        example: hadir
+      waktu_absen:
+        type: string
+        example: '2026-04-08 09:15:00'
+  controllers.SuccessMessage:
+    type: object
+    properties:
+      message:
+        type: string
+        example: Aksi berhasil dilakukan!
 securityDefinitions:
   BearerAuth:
     description: 'Masukkan token JWT dengan format: Bearer {token}'
-    in: header
-    name: Authorization
     type: apiKey
-swagger: "2.0"
+    name: Authorization
+    in: header

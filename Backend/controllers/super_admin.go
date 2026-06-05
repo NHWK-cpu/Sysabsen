@@ -144,7 +144,7 @@ func HardDeleteUser(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    // 1. Cari tahu dulu role user-nya (dan cegah senjata makan tuan)
+    // 1. Cari tahu dulu role user-nya
     var role string
     err := config.DB.QueryRow("SELECT role FROM users WHERE id = ?", userID).Scan(&role)
     if err != nil {
@@ -163,9 +163,9 @@ func HardDeleteUser(w http.ResponseWriter, r *http.Request) {
         http.Error(w, `{"error": "Gagal memulai pembersihan database"}`, http.StatusInternalServerError)
         return
     }
-    defer tx.Rollback() // Kalau di tengah jalan gagal, kembalikan semua seperti semula
+    defer tx.Rollback()
 
-    // 3. Hapus data binding perangkat (berlaku untuk semua role yang punya device)
+    // 3. Hapus data binding perangkat
     tx.Exec("DELETE FROM user_devices WHERE user_id = ?", userID)
 
     // 4. Hapus data berdasarkan rantai Role-nya
@@ -173,24 +173,25 @@ func HardDeleteUser(w http.ResponseWriter, r *http.Request) {
         var siswaID int
         errSiswa := tx.QueryRow("SELECT id FROM siswa WHERE user_id = ?", userID).Scan(&siswaID)
         if errSiswa == nil {
-            // Hapus dari ujung rantai dulu
             tx.Exec("DELETE FROM log_kehadiran WHERE siswa_id = ?", siswaID)
             tx.Exec("DELETE FROM siswa_kelas WHERE siswa_id = ?", siswaID)
-            // Baru hapus profil siswanya
             tx.Exec("DELETE FROM siswa WHERE id = ?", siswaID)
         }
     } else if role == "guru" {
-        // Jika guru punya sesi_pembelajaran, hapus sesinya dulu beserta log di dalamnya
         var guruID int
         errGuru := tx.QueryRow("SELECT id FROM guru WHERE user_id = ?", userID).Scan(&guruID)
         if errGuru == nil {
-            // Hapus semua log kehadiran yang numpang di sesi milik guru ini
             tx.Exec("DELETE FROM log_kehadiran WHERE sesi_id IN (SELECT id FROM sesi_pembelajaran WHERE guru_id = ?)", guruID)
-            // Hapus sesinya
             tx.Exec("DELETE FROM sesi_pembelajaran WHERE guru_id = ?", guruID)
-            // Hapus profil guru
             tx.Exec("DELETE FROM guru WHERE id = ?", guruID)
         }
+    } else if role == "admin" {
+        // Admin tidak punya relasi ke tabel detail, jadi cukup log saja dan biarkan lanjut ke tahap 5
+        fmt.Printf("Memproses penghapusan permanen untuk akun Admin ID: %s\n", userID)
+    } else {
+        // Tolak jika role tidak dikenali untuk keamanan ekstra
+        http.Error(w, `{"error": "Role user tidak valid untuk dihapus"}`, http.StatusBadRequest)
+        return
     }
 
     // 5. Terakhir, tebang akar utamanya di tabel users
@@ -236,4 +237,46 @@ func ReactivateUser(w http.ResponseWriter, r *http.Request) {
 
     w.Header().Set("Content-Type", "application/json")
     w.Write([]byte(fmt.Sprintf(`{"message": "Berhasil! Akun %s tersebut telah diaktifkan kembali dan bisa login sekarang."}`, role)))
+}
+
+func GetActivityLogs(w http.ResponseWriter, r *http.Request) {
+    // Kita Join dengan tabel users untuk mendapatkan username pelakunya
+    query := `
+    SELECT a.id, u.username, a.role, a.action, a.deskripsi, a.created_at
+    FROM activity_logs a
+    JOIN users u ON a.user_id = u.id
+    ORDER BY a.created_at DESC
+    LIMIT 200 -- Dibatasi 200 log terbaru agar query tidak berat
+    `
+    rows, err := config.DB.Query(query)
+    if err != nil {
+        http.Error(w, "Gagal menarik data log: "+err.Error(), 500)
+        return
+    }
+    defer rows.Close()
+
+    type LogResponse struct {
+        ID        int    `json:"id"`
+        Username  string `json:"username"`
+        Role      string `json:"role"`
+        Action    string `json:"action"`
+        Deskripsi string `json:"deskripsi"`
+        CreatedAt string `json:"created_at"`
+    }
+
+    var list []LogResponse
+    for rows.Next() {
+        var l LogResponse
+        if err := rows.Scan(&l.ID, &l.Username, &l.Role, &l.Action, &l.Deskripsi, &l.CreatedAt); err == nil {
+            list = append(list, l)
+        }
+    }
+
+    // Kembalikan array kosong jika log masih belum ada (mencegah null di Svelte)
+    if list == nil {
+        list = []LogResponse{}
+    }
+
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(list)
 }

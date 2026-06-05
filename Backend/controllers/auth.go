@@ -136,16 +136,29 @@ func LoginSiswa(w http.ResponseWriter, r *http.Request) {
 
 	var userID int
 	var hashedPassword string
+	var isActive int
 
-	err := config.DB.QueryRow("SELECT id, password FROM users WHERE username = ? AND role = 'siswa' AND is_active = 1", input.Username).Scan(&userID, &hashedPassword)
+	err := config.DB.QueryRow(
+		"SELECT id, password, is_active FROM users WHERE username = ? AND role = 'siswa'",
+		input.Username,
+	).Scan(&userID, &hashedPassword, &isActive)
 	if err != nil {
-		http.Error(w, "Username/Password salah atau akun Anda telah dinonaktifkan", 401)
+		http.Error(w, `{"error": "Username atau password salah"}`, http.StatusUnauthorized)
 		return
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(input.Password))
 	if err != nil {
-		http.Error(w, "Username atau Password salah", 401)
+		http.Error(w, `{"error": "Username atau password salah"}`, http.StatusUnauthorized)
+		return
+	}
+
+	if isActive != 1 {
+		http.Error(
+			w,
+			"Akun Anda belum disetujui admin atau telah dinonaktifkan.",
+			http.StatusForbidden,
+		)
 		return
 	}
 

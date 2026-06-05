@@ -142,9 +142,10 @@
 						else if (rawStatus === 'izin') finalStatus = 'Izin';
 						else if (rawStatus === 'sakit') finalStatus = 'Sakit';
 
+						// db_id = id siswa unik untuk API/update; nama_sekolah hanya untuk tampilan
 						uniqueStudents.push({
-							id: s.nama_sekolah,
 							db_id: s.id,
+							nama_sekolah: s.nama_sekolah ?? '',
 							name: s.nama_lengkap || s.nama,
 							status: finalStatus,
 							waktu_absen: s.waktu_absen
@@ -159,8 +160,8 @@
 		}
 	};
 
-	const updateStatus = (id: string | number, newStatus: string) => {
-		const index = students.findIndex((s) => s.id === id);
+	const updateStatus = (dbId: string | number, newStatus: string) => {
+		const index = students.findIndex((s) => s.db_id === dbId);
 		if (index !== -1 && students[index].status !== newStatus) {
 			students[index].status = newStatus;
 			isDirty = true;
@@ -172,7 +173,7 @@
 
 		const studentsToUpdate = students.filter((s) => s.status !== 'Belum Absen');
 		if (studentsToUpdate.length === 0) {
-			alert('Tidak ada data yang diubah.');
+			alert('Belum ada perubahan yang perlu disimpan.');
 			return;
 		}
 
@@ -193,7 +194,7 @@
 			const results = await Promise.all(promises);
 			if (results.every((res) => res.ok)) {
 				isDirty = false;
-				alert('Absensi manual tersimpan!');
+				alert('Absensi manual berhasil disimpan!');
 				fetchStats(activeSessionId);
 			} else {
 				alert('Beberapa data gagal dicatat.');
@@ -293,16 +294,28 @@
 	<header
 		class="flex items-center justify-between border-b border-slate-100 bg-white px-4 py-4 shadow-sm md:px-8"
 	>
-		<div class="flex items-center gap-3">
-			<div
-				class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-blue font-bold text-white"
-			>
-				A
+		<div class="flex items-center gap-6">
+			<div class="flex items-center gap-3">
+				<div
+					class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-blue font-bold text-white"
+				>
+					A
+				</div>
+				<div>
+					<h1 class="text-lg leading-none font-black tracking-tighter text-slate-800">ABSENSI</h1>
+					<p class="text-[10px] font-bold tracking-widest text-slate-400 uppercase">Panel guru</p>
+				</div>
 			</div>
-			<div>
-				<h1 class="text-lg leading-none font-black tracking-tighter text-slate-800">ABSENSI</h1>
-				<p class="text-[10px] font-bold tracking-widest text-slate-400 uppercase">Teacher Panel</p>
-			</div>
+
+			<nav class="hidden gap-4 border-l border-slate-100 pl-6 md:flex">
+				<button class="border-b-2 border-brand-blue pb-1 text-xs font-black text-brand-blue"
+					>Absensi</button
+				>
+				<button
+					class="text-xs font-bold text-slate-400 transition-colors hover:text-brand-blue"
+					onclick={() => goto('/teacher/students')}>Daftar Siswa</button
+				>
+			</nav>
 		</div>
 
 		<div class="flex items-center gap-4 md:gap-6">
@@ -321,7 +334,7 @@
 				onclick={logout}
 				class="rounded-xl bg-red-50 px-4 py-2 text-[10px] font-black tracking-widest text-red-600 uppercase transition-colors hover:bg-red-100 md:px-5 md:py-2.5"
 			>
-				Logout
+				Keluar
 			</button>
 		</div>
 	</header>
@@ -393,7 +406,7 @@
 								onclick={() => (showModal = true)}
 								class="h-[54px] w-full rounded-2xl bg-brand-blue px-6 text-xs font-black tracking-widest text-white uppercase shadow-lg shadow-blue-500/20 transition-all hover:scale-105 active:scale-95 md:w-auto"
 							>
-								Show QR
+								Tampilkan QR
 							</button>
 						{:else}
 							<div class="hidden h-[54px] w-full md:block md:w-[120px]"></div>
@@ -502,12 +515,12 @@
 					<!-- <button
 						onclick={handleBackup}
 						class="rounded-xl border border-slate-100 bg-slate-50 px-4 py-2 text-[10px] font-black tracking-widest text-slate-500 uppercase transition-all hover:bg-slate-100 hover:text-slate-800"
-						>Backup</button
+						>Cadangkan</button
 					> -->
 					<button
 						onclick={handleExport}
 						class="rounded-xl bg-indigo-50 px-4 py-2 text-[10px] font-black tracking-widest text-indigo-600 uppercase transition-all hover:bg-indigo-100"
-						>Export Data</button
+						>Ekspor data</button
 					>
 
 					{#if isDirty}
@@ -521,7 +534,7 @@
 								></span>
 								<span class="relative inline-flex h-2 w-2 rounded-full bg-white"></span>
 							</span>
-							Save
+							Simpan
 						</button>
 					{/if}
 				</div>
@@ -550,21 +563,27 @@
 						</tr>
 					</thead>
 					<tbody class="divide-y divide-slate-50">
-						{#each students as student, i}
+						{#each students as student, i (student.db_id)}
 							<tr class="transition-colors hover:bg-slate-50/30">
 								<td class="px-6 py-4 text-sm font-bold text-slate-400 md:px-8 md:py-5">{i + 1}</td>
 								<td class="px-6 py-4 md:px-8 md:py-5">
 									<p class="font-bold text-slate-800">{student.name}</p>
-									<p class="text-[10px] font-medium text-slate-400">Sekolah: {student.id}</p>
+									<p class="text-[10px] font-medium text-slate-400">
+										Sekolah: {student.nama_sekolah}
+									</p>
 								</td>
 								<td class="px-6 py-4 text-center md:px-8 md:py-5">
 									<span
 										class="rounded-full px-4 py-1.5 text-[9px] font-black tracking-widest whitespace-nowrap uppercase {student.status ===
 										'Hadir'
 											? 'border border-green-200 bg-green-100 text-green-700'
-											: student.status === 'Belum Absen'
-												? 'border border-slate-200 bg-slate-100 text-slate-500'
-												: 'border border-red-200 bg-red-100 text-red-700'}"
+											: student.status === 'Izin'
+												? 'border border-blue-200 bg-blue-100 text-blue-700'
+												: student.status === 'Sakit'
+													? 'border border-yellow-200 bg-yellow-100 text-yellow-700'
+													: student.status === 'Belum Absen'
+														? 'border border-slate-200 bg-slate-100 text-slate-500'
+														: 'border border-red-200 bg-red-100 text-red-700'}"
 									>
 										{student.status}
 									</span>
@@ -572,7 +591,7 @@
 								<td class="px-6 py-4 md:px-8 md:py-5">
 									<div class="flex justify-end gap-2">
 										<button
-											onclick={() => updateStatus(student.id, 'Hadir')}
+											onclick={() => updateStatus(student.db_id, 'Hadir')}
 											class="rounded-xl px-4 py-2 text-[10px] font-black tracking-widest uppercase transition-all {student.status ===
 											'Hadir'
 												? 'bg-green-600 text-white shadow-md'
@@ -580,12 +599,28 @@
 											>Hadir</button
 										>
 										<button
-											onclick={() => updateStatus(student.id, 'Alpa')}
+											onclick={() => updateStatus(student.db_id, 'Alpa')}
 											class="rounded-xl px-4 py-2 text-[10px] font-black tracking-widest uppercase transition-all {student.status ===
 											'Alpa'
 												? 'bg-red-600 text-white shadow-md'
 												: 'bg-slate-100 text-slate-500 hover:bg-red-50 hover:text-red-600'}"
 											>Alpa</button
+										>
+										<button
+											onclick={() => updateStatus(student.db_id, 'Sakit')}
+											class="rounded-xl px-4 py-2 text-[10px] font-black tracking-widest uppercase transition-all {student.status ===
+											'Sakit'
+												? 'bg-yellow-600 text-white shadow-md'
+												: 'bg-slate-100 text-slate-500 hover:bg-yellow-50 hover:text-yellow-600'}"
+											>Sakit</button
+										>
+										<button
+											onclick={() => updateStatus(student.db_id, 'Izin')}
+											class="rounded-xl px-4 py-2 text-[10px] font-black tracking-widest uppercase transition-all {student.status ===
+											'Izin'
+												? 'bg-blue-600 text-white shadow-md'
+												: 'bg-slate-100 text-slate-500 hover:bg-blue-50 hover:text-blue-600'}"
+											>Izin</button
 										>
 									</div>
 								</td>
@@ -612,7 +647,7 @@
 				class="scale-in-center w-full max-w-md rounded-[2.5rem] bg-white p-8 text-center shadow-2xl md:rounded-[3rem] md:p-12"
 			>
 				<h3 class="mb-2 text-xl font-black tracking-tight text-slate-900 uppercase md:text-2xl">
-					Scan Kehadiran
+					Pindai kehadiran
 				</h3>
 				<p
 					class="mb-6 text-[10px] font-bold tracking-widest text-slate-400 uppercase md:mb-8 md:text-xs"
