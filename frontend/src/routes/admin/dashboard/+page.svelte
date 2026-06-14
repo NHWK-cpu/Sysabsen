@@ -141,7 +141,7 @@
 			} else if (activeMenu === 'kelas') {
 				fetchPeriods();
 				fetchClasses();
-			} 			else if (activeMenu === 'mapel') fetchSubjects();
+			} else if (activeMenu === 'mapel') fetchSubjects();
 			else if (activeMenu === 'perangkat') fetchPendingDevices();
 			else if (activeMenu === 'pendaftar_siswa') fetchPendingStudentRegistrations();
 			else if (activeMenu === 'admin_users') fetchAdminList();
@@ -315,7 +315,12 @@
 	};
 
 	const approveStudentRegistration = async (userId: number) => {
-		if (!confirm('Setujui pendaftar ini? Akun aktif dan perangkat yang didaftarkan langsung boleh login.')) return;
+		if (
+			!confirm(
+				'Setujui pendaftar ini? Akun aktif dan perangkat yang didaftarkan langsung boleh login.'
+			)
+		)
+			return;
 		try {
 			const res = await fetch(`${API_BASE_URL}/admin/siswa/approve-registration`, {
 				method: 'POST',
@@ -1015,36 +1020,6 @@
 		}
 	};
 
-	const hardDeleteUser = async (id: number) => {
-		if (
-			!confirm(
-				'PERINGATAN KERAS!\n\nHapus permanen user ini beserta seluruh histori absensi dan perangkatnya?\nAksi ini tidak bisa dibatalkan.'
-			)
-		)
-			return;
-		try {
-			const res = await fetch(`${API_BASE_URL}/superadmin/users/hard-delete?id=${id}`, {
-				method: 'DELETE',
-				headers: { Authorization: `Bearer ${token}` }
-			});
-
-			if (res.ok) {
-				alert('Data berhasil dimusnahkan secara permanen!');
-
-				// PERBAIKAN: Refresh data sesuai tab yang sedang dibuka!
-				if (activeMenu === 'admin_users') {
-					fetchAdminList();
-				} else {
-					fetchUsersAll();
-				}
-			} else {
-				alert(`Gagal: ${await res.text()}`);
-			}
-		} catch (error) {
-			alert('Kesalahan Jaringan');
-		}
-	};
-
 	const logout = () => {
 		localStorage.removeItem('jwt_token');
 		localStorage.removeItem('user_role');
@@ -1319,9 +1294,8 @@
 												class="rounded-full border px-4 py-1.5 text-[9px] font-black tracking-widest whitespace-nowrap uppercase {activity.status ===
 												'Online'
 													? 'border-green-200 bg-green-100 text-green-700'
-													: 'border-amber-200 bg-amber-100 text-amber-700'}">{activity.status === 'Online'
-													? 'Aktif'
-													: activity.status}</span
+													: 'border-amber-200 bg-amber-100 text-amber-700'}"
+												>{activity.status === 'Online' ? 'Aktif' : activity.status}</span
 											>
 										</td>
 									</tr>
@@ -1423,7 +1397,9 @@
 												{#if guruClasses.length > 0}
 													<div class="flex flex-wrap gap-1">
 														{#each guruClasses as cls}
-															<span class="rounded-md bg-indigo-50 px-2.5 py-1 text-[10px] font-bold text-indigo-600">
+															<span
+																class="rounded-md bg-indigo-50 px-2.5 py-1 text-[10px] font-bold text-indigo-600"
+															>
 																{cls.name}
 															</span>
 														{/each}
@@ -1479,11 +1455,6 @@
 														onclick={() => reactivateUser(user.id)}
 														class="rounded-xl bg-green-50 px-4 py-2 text-[10px] font-black tracking-widest text-green-600 uppercase transition-all hover:bg-green-100"
 														>Aktifkan</button
-													>
-													<button
-														onclick={() => hardDeleteUser(user.id)}
-														class="rounded-xl bg-red-100 px-4 py-2 text-[10px] font-black tracking-widest text-red-700 uppercase shadow-sm transition-all hover:bg-red-200"
-														>Musnahkan</button
 													>
 												{/if}
 											</div>
@@ -1661,24 +1632,6 @@
 												>
 											{/if}
 										</button>
-										<button
-											onclick={() => deletePeriod(period.id)}
-											class="p-2 text-red-400 transition-colors hover:text-red-600"
-										>
-											<svg
-												xmlns="http://www.w3.org/2000/svg"
-												class="h-5 w-5"
-												viewBox="0 0 24 24"
-												fill="none"
-												stroke="currentColor"
-												stroke-width="2"
-												stroke-linecap="round"
-												stroke-linejoin="round"
-												><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path
-													d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"
-												/></svg
-											>
-										</button>
 									</div>
 								{/each}
 							</div>
@@ -1727,7 +1680,8 @@
 												<td class="px-6 py-5 font-black text-slate-800">{item.name}</td>
 												<td class="px-6 py-5 font-medium text-slate-500">
 													<span class="rounded-lg bg-slate-100 px-3 py-1 text-xs font-bold">
-														{periods.find((p) => p.id === item.periode_id)?.tahunAjar || 'Tidak diketahui'}
+														{periods.find((p) => p.id === item.periode_id)?.tahunAjar ||
+															'Tidak diketahui'}
 														({periods.find((p) => p.id === item.periode_id)?.semester || '-'})
 													</span>
 												</td>
@@ -1742,11 +1696,6 @@
 															onclick={() => openEditModal(item)}
 															class="rounded-xl bg-slate-50 px-4 py-2 text-[10px] font-black tracking-widest text-brand-blue uppercase transition-all hover:bg-blue-50"
 															>Ubah</button
-														>
-														<button
-															onclick={() => deleteClass(item.id)}
-															class="rounded-xl bg-slate-50 px-4 py-2 text-[10px] font-black tracking-widest text-red-500 uppercase transition-all hover:bg-red-50"
-															>Hapus</button
 														>
 													</div>
 												</td>
@@ -1879,26 +1828,6 @@
 														/></svg
 													>
 												</button>
-
-												<button
-													onclick={() => deleteSubject(item.id)}
-													class="p-2 text-slate-300 transition-colors hover:text-red-600"
-													title="Hapus Permanen"
-												>
-													<svg
-														xmlns="http://www.w3.org/2000/svg"
-														class="h-5 w-5"
-														viewBox="0 0 24 24"
-														fill="none"
-														stroke="currentColor"
-														stroke-width="2"
-														stroke-linecap="round"
-														stroke-linejoin="round"
-														><path d="M3 6h18" /><path
-															d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"
-														/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /></svg
-													>
-												</button>
 											</div>
 										</td>
 									</tr>
@@ -1915,7 +1844,9 @@
 						<h2 class="text-2xl font-black tracking-tight text-slate-900 uppercase">
 							Manajemen admin standar
 						</h2>
-						<p class="mt-1 text-sm font-medium text-slate-500">Hanya bisa diakses oleh admin utama.</p>
+						<p class="mt-1 text-sm font-medium text-slate-500">
+							Hanya bisa diakses oleh admin utama.
+						</p>
 					</div>
 					<button
 						onclick={openAddModal}
@@ -1973,15 +1904,6 @@
 											>
 												Ubah data
 											</button>
-
-											{#if admin.status === 'Nonaktif'}
-												<button
-													onclick={() => hardDeleteUser(admin.id)}
-													class="ml-2 rounded-xl bg-red-100 px-4 py-2 text-[10px] font-black tracking-widest text-red-700 uppercase shadow-sm transition-all hover:bg-red-200"
-												>
-													Musnahkan
-												</button>
-											{/if}
 										</td>
 									</tr>
 								{/each}
