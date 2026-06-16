@@ -3,3 +3,4 @@ Design_per_Page/
 .env*
 *.txt
 .openclaude/
+.gomodcache/
