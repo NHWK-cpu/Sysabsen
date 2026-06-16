@@ -3,17 +3,18 @@ package controllers
 import (
 	"context"
 	"encoding/json"
-	"net/http"
 	"fmt"
+	"github.com/golang-jwt/jwt/v5" // Tambahkan ini untuk membaca context
+	"net/http"
 	"os"
 	"os/exec"
-	"time"
 	"strconv" // Tambahkan ini jika belum ada
-	"github.com/golang-jwt/jwt/v5" // Tambahkan ini untuk membaca context
-    
+	"strings"
+	"time"
+
 	"backend-absensi/config"
-	"backend-absensi/models" // Import package models yang baru
 	"backend-absensi/helpers"
+	"backend-absensi/models" // Import package models yang baru
 )
 
 // =========================================
@@ -21,107 +22,109 @@ import (
 // =========================================
 
 func BackupDatabase(w http.ResponseWriter, r *http.Request) {
-    // 1. Kasih timeout 15 detik untuk proses ekspor
-    ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
-    defer cancel()
+	// 1. Kasih timeout 15 detik untuk proses ekspor
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
 
-    fileName := fmt.Sprintf("Backup_Full_%s.sql", time.Now().Format("2006-01-02_15-04-05"))
-    
-    dbUser := os.Getenv("DB_USER")
-    if dbUser == "" {
-        dbUser = "root" // Fallback aman jika DB_USER di .env kosong
-    }
-    dbName := os.Getenv("DB_NAME")
+	fileName := fmt.Sprintf("Backup_Full_%s.sql", time.Now().Format("2006-01-02_15-04-05"))
 
-    // Karena di VPS, mysqldump bisa langsung jalan tanpa -h
-    cmd := exec.CommandContext(ctx, "mysqldump", "-u", dbUser, dbName, "--result-file="+fileName)
-    
-    // Inject password lewat env agar aman dari interaktif prompt
-    cmd.Env = os.Environ()
-    cmd.Env = append(cmd.Env, "MYSQL_PWD="+os.Getenv("DB_PASSWORD"))
+	dbUser := os.Getenv("DB_USER")
+	if dbUser == "" {
+		dbUser = "root" // Fallback aman jika DB_USER di .env kosong
+	}
+	dbName := os.Getenv("DB_NAME")
 
-    output, err := cmd.CombinedOutput()
-    if err != nil {
-        if ctx.Err() == context.DeadlineExceeded {
-            http.Error(w, "Gagal: Timeout saat membuat file backup di VPS.", http.StatusGatewayTimeout)
-            return
-        }
-        http.Error(w, fmt.Sprintf("Gagal dump database:\nError: %s\nOutput: %s", err.Error(), string(output)), http.StatusInternalServerError)
-        return
-    }
+	// Karena di VPS, mysqldump bisa langsung jalan tanpa -h
+	cmd := exec.CommandContext(ctx, "mysqldump", "-u", dbUser, dbName, "--result-file="+fileName)
 
-    // 2. TANGKAP ERROR GOOGLE DRIVE (Ini yang bikin Panic)
-    srv, errDriveInit := helpers.InitDriveService()
-    if errDriveInit != nil {
-        os.Remove(fileName) // Hapus file lokal agar VPS tidak penuh
-        http.Error(w, "Sistem gagal terhubung ke Google Drive. Pastikan file credentials.json ada di VPS: "+errDriveInit.Error(), http.StatusInternalServerError)
-        return
-    }
+	// Inject password lewat env agar aman dari interaktif prompt
+	cmd.Env = os.Environ()
+	cmd.Env = append(cmd.Env, "MYSQL_PWD="+os.Getenv("DB_PASSWORD"))
 
-    errDriveUpload := helpers.UploadToDrive(srv, fileName, "1OpRprWCk2MgurUclTWdTR43EaoKuOIGH")
-    
-    // Hapus file dump setelah upload selesai
-    time.Sleep(500 * time.Millisecond)
-    os.Remove(fileName)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		if ctx.Err() == context.DeadlineExceeded {
+			http.Error(w, "Gagal: Timeout saat membuat file backup di VPS.", http.StatusGatewayTimeout)
+			return
+		}
+		http.Error(w, fmt.Sprintf("Gagal dump database:\nError: %s\nOutput: %s", err.Error(), string(output)), http.StatusInternalServerError)
+		return
+	}
 
-    if errDriveUpload != nil {
-        http.Error(w, "Gagal upload backup ke Google Drive: "+errDriveUpload.Error(), http.StatusInternalServerError)
-        return
-    }
-    
-    w.Write([]byte("Backup Database Berhasil Diupload ke Google Drive!"))
+	// 2. TANGKAP ERROR GOOGLE DRIVE (Ini yang bikin Panic)
+	srv, errDriveInit := helpers.InitDriveService()
+	if errDriveInit != nil {
+		os.Remove(fileName) // Hapus file lokal agar VPS tidak penuh
+		http.Error(w, "Sistem gagal terhubung ke Google Drive. Pastikan file credentials.json ada di VPS: "+errDriveInit.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	errDriveUpload := helpers.UploadToDrive(srv, fileName, "1OpRprWCk2MgurUclTWdTR43EaoKuOIGH")
+
+	// Hapus file dump setelah upload selesai
+	time.Sleep(500 * time.Millisecond)
+	os.Remove(fileName)
+
+	if errDriveUpload != nil {
+		http.Error(w, "Gagal upload backup ke Google Drive: "+errDriveUpload.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Write([]byte("Backup Database Berhasil Diupload ke Google Drive!"))
 }
 
 func RestoreDatabase(w http.ResponseWriter, r *http.Request) {
-    fileID := r.URL.Query().Get("file_id")
-    if fileID == "" {
-        http.Error(w, "file_id wajib diisi", http.StatusBadRequest)
-        return
-    }
+	fileID := r.URL.Query().Get("file_id")
+	if fileID == "" {
+		http.Error(w, "file_id wajib diisi", http.StatusBadRequest)
+		return
+	}
 
-    localFile := "restore_temp.sql"
-    
-    // TANGKAP ERROR INIT DRIVE
-    srv, errDriveInit := helpers.InitDriveService()
-    if errDriveInit != nil {
-        http.Error(w, "Sistem gagal terhubung ke Google Drive: "+errDriveInit.Error(), http.StatusInternalServerError)
-        return
-    }
+	localFile := "restore_temp.sql"
 
-    if err := helpers.DownloadFromDrive(srv, fileID, localFile); err != nil {
-        http.Error(w, "Gagal download file SQL dari Drive: "+err.Error(), http.StatusInternalServerError)
-        return
-    }
+	// TANGKAP ERROR INIT DRIVE
+	srv, errDriveInit := helpers.InitDriveService()
+	if errDriveInit != nil {
+		http.Error(w, "Sistem gagal terhubung ke Google Drive: "+errDriveInit.Error(), http.StatusInternalServerError)
+		return
+	}
 
-    ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-    defer cancel()
+	if err := helpers.DownloadFromDrive(srv, fileID, localFile); err != nil {
+		http.Error(w, "Gagal download file SQL dari Drive: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
 
-    dbUser := os.Getenv("DB_USER")
-    if dbUser == "" { dbUser = "root" }
-    dbName := os.Getenv("DB_NAME")
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
 
-    cmd := exec.CommandContext(ctx, "mysql", "-u", dbUser, dbName)
-    cmd.Env = os.Environ()
-    cmd.Env = append(cmd.Env, "MYSQL_PWD="+os.Getenv("DB_PASSWORD"))
+	dbUser := os.Getenv("DB_USER")
+	if dbUser == "" {
+		dbUser = "root"
+	}
+	dbName := os.Getenv("DB_NAME")
 
-    sqlFile, _ := os.Open(localFile)
-    cmd.Stdin = sqlFile
-    
-    output, err := cmd.CombinedOutput()
-    
-    sqlFile.Close()
-    os.Remove(localFile)
+	cmd := exec.CommandContext(ctx, "mysql", "-u", dbUser, dbName)
+	cmd.Env = os.Environ()
+	cmd.Env = append(cmd.Env, "MYSQL_PWD="+os.Getenv("DB_PASSWORD"))
 
-    if err != nil {
-        if ctx.Err() == context.DeadlineExceeded {
-            http.Error(w, "Gagal: Timeout saat melakukan proses Restore di MariaDB.", http.StatusGatewayTimeout)
-            return
-        }
-        http.Error(w, fmt.Sprintf("Gagal restore database:\nError: %s\nOutput: %s", err.Error(), string(output)), http.StatusInternalServerError)
-        return
-    }
-    
-    w.Write([]byte("Database Berhasil Direstore ke Kondisi Backup!"))
+	sqlFile, _ := os.Open(localFile)
+	cmd.Stdin = sqlFile
+
+	output, err := cmd.CombinedOutput()
+
+	sqlFile.Close()
+	os.Remove(localFile)
+
+	if err != nil {
+		if ctx.Err() == context.DeadlineExceeded {
+			http.Error(w, "Gagal: Timeout saat melakukan proses Restore di MariaDB.", http.StatusGatewayTimeout)
+			return
+		}
+		http.Error(w, fmt.Sprintf("Gagal restore database:\nError: %s\nOutput: %s", err.Error(), string(output)), http.StatusInternalServerError)
+		return
+	}
+
+	w.Write([]byte("Database Berhasil Direstore ke Kondisi Backup!"))
 }
 
 // ==========================================
@@ -241,10 +244,10 @@ func GetKelasBySiswa(w http.ResponseWriter, r *http.Request) {
 	defer rows.Close()
 
 	type KelasResponse struct {
-		ID         int    `json:"id"`
-		NamaKelas  string `json:"name"`
-		TahunAjar  string `json:"tahun_ajaran"`
-		Semester   string `json:"semester"`
+		ID        int    `json:"id"`
+		NamaKelas string `json:"name"`
+		TahunAjar string `json:"tahun_ajaran"`
+		Semester  string `json:"semester"`
 	}
 
 	var list []KelasResponse
@@ -260,10 +263,9 @@ func GetKelasBySiswa(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetSiswaByKelas(w http.ResponseWriter, r *http.Request) {
-    kelasID := r.URL.Query().Get("kelas_id")
+	kelasID := r.URL.Query().Get("kelas_id")
 
-    
-    query := `
+	query := `
     SELECT u.id as user_id, s.nama_lengkap, s.nama_sekolah
     FROM siswa_kelas sk
     JOIN siswa s ON sk.siswa_id = s.id
@@ -271,205 +273,215 @@ func GetSiswaByKelas(w http.ResponseWriter, r *http.Request) {
     WHERE sk.kelas_id = ?
     ORDER BY s.nama_lengkap ASC
     `
-    rows, err := config.DB.Query(query, kelasID)
-    if err != nil {
-        http.Error(w, "Gagal mengambil data siswa di kelas: "+err.Error(), 500)
-        return
-    }
-    defer rows.Close()
+	rows, err := config.DB.Query(query, kelasID)
+	if err != nil {
+		http.Error(w, "Gagal mengambil data siswa di kelas: "+err.Error(), 500)
+		return
+	}
+	defer rows.Close()
 
-    type SiswaKelasResponse struct {
-        UserID      int    `json:"user_id"` 
-        NamaLengkap string `json:"nama_lengkap"`
-        NamaSekolah string `json:"nama_sekolah"` 
-    }
+	type SiswaKelasResponse struct {
+		UserID      int    `json:"user_id"`
+		NamaLengkap string `json:"nama_lengkap"`
+		NamaSekolah string `json:"nama_sekolah"`
+	}
 
-    var list []SiswaKelasResponse
-    for rows.Next() {
-        var s SiswaKelasResponse
-        // PERUBAHAN: Scan ke &s.NamaSekolah
-        if err := rows.Scan(&s.UserID, &s.NamaLengkap, &s.NamaSekolah); err == nil {
-            list = append(list, s)
-        }
-    }
+	var list []SiswaKelasResponse
+	for rows.Next() {
+		var s SiswaKelasResponse
+		// PERUBAHAN: Scan ke &s.NamaSekolah
+		if err := rows.Scan(&s.UserID, &s.NamaLengkap, &s.NamaSekolah); err == nil {
+			list = append(list, s)
+		}
+	}
 
-    if list == nil {
-        list = []SiswaKelasResponse{}
-    }
+	if list == nil {
+		list = []SiswaKelasResponse{}
+	}
 
-    w.Header().Set("Content-Type", "application/json")
-    json.NewEncoder(w).Encode(list)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(list)
 }
 
 func AssignSiswaToKelas(w http.ResponseWriter, r *http.Request) {
-    var sk struct {
-        SiswaUserID int `json:"siswa_id"`
-        KelasID     int `json:"kelas_id"`
-    }
-    json.NewDecoder(r.Body).Decode(&sk)
+	var sk struct {
+		SiswaUserID int `json:"siswa_id"`
+		KelasID     int `json:"kelas_id"`
+	}
+	json.NewDecoder(r.Body).Decode(&sk)
 
-    // AMBIL DATA USER YANG SEDANG LOGIN DARI TOKEN
-    userInfo := r.Context().Value("userInfo").(jwt.MapClaims)
-    role := userInfo["role"].(string)
-    loggedInUserID := int(userInfo["user_id"].(float64))
+	// AMBIL DATA USER YANG SEDANG LOGIN DARI TOKEN
+	userInfo := r.Context().Value("userInfo").(jwt.MapClaims)
+	role := userInfo["role"].(string)
+	loggedInUserID := int(userInfo["user_id"].(float64))
 
-    // CEK OTORISASI JIKA YANG LOGIN ADALAH GURU
-    if role == "guru" {
-        var waliGuruID int
-        // Cari ID guru berdasarkan user_id, lalu cocokkan dengan wali_guru_id di tabel kelas
-        errCheck := config.DB.QueryRow(`
+	// CEK OTORISASI JIKA YANG LOGIN ADALAH GURU
+	if role == "guru" {
+		var waliGuruID int
+		// Cari ID guru berdasarkan user_id, lalu cocokkan dengan wali_guru_id di tabel kelas
+		errCheck := config.DB.QueryRow(`
             SELECT k.wali_guru_id FROM kelas k 
             JOIN guru g ON k.wali_guru_id = g.id 
             WHERE k.id = ? AND g.user_id = ?`, sk.KelasID, loggedInUserID).Scan(&waliGuruID)
-        
-        if errCheck != nil {
-            http.Error(w, "Akses ditolak: Anda bukan wali dari kelas ini!", http.StatusForbidden)
-            return
-        }
-    }
 
-    // TERJEMAHKAN: Cari siswa.id yang asli berdasarkan users.id
-    var realSiswaID int
-    err := config.DB.QueryRow("SELECT id FROM siswa WHERE user_id = ?", sk.SiswaUserID).Scan(&realSiswaID)
-    if err != nil {
-        http.Error(w, "Gagal: Profil siswa tidak ditemukan di tabel master siswa.", http.StatusNotFound)
-        return
-    }
+		if errCheck != nil {
+			http.Error(w, "Akses ditolak: Anda bukan wali dari kelas ini!", http.StatusForbidden)
+			return
+		}
+	}
 
-    // EKSEKUSI
-    _, err = config.DB.Exec("INSERT INTO siswa_kelas (siswa_id, kelas_id) VALUES (?, ?)", realSiswaID, sk.KelasID)
-    if err != nil {
-        http.Error(w, "Gagal assign siswa: "+err.Error(), 500)
-        return
-    }
+	// TERJEMAHKAN: Cari siswa.id yang asli berdasarkan users.id
+	var realSiswaID int
+	err := config.DB.QueryRow("SELECT id FROM siswa WHERE user_id = ?", sk.SiswaUserID).Scan(&realSiswaID)
+	if err != nil {
+		http.Error(w, "Gagal: Profil siswa tidak ditemukan di tabel master siswa.", http.StatusNotFound)
+		return
+	}
 
-    // CATAT LOG OTOMATIS
-    deskripsi := fmt.Sprintf("Menambahkan siswa (User ID: %d) ke dalam Kelas ID: %d", sk.SiswaUserID, sk.KelasID)
-    go catatLog(loggedInUserID, role, "ASSIGN_SISWA", deskripsi) // Pakai 'go' agar berjalan di background tanpa memblokir respon
+	// EKSEKUSI
+	_, err = config.DB.Exec("INSERT INTO siswa_kelas (siswa_id, kelas_id) VALUES (?, ?)", realSiswaID, sk.KelasID)
+	if err != nil {
+		if strings.Contains(err.Error(), "Duplicate entry") || strings.Contains(err.Error(), "1062") {
+			http.Error(w, "Siswa sudah terdaftar di kelas ini. Pilih siswa lain atau cek kembali daftar siswa pada kelas tersebut.", http.StatusConflict)
+			return
+		}
 
-    w.Write([]byte("Siswa berhasil dimasukkan ke kelas"))
+		http.Error(w, "Gagal menambahkan siswa ke kelas. Silakan coba lagi.", http.StatusInternalServerError)
+		return
+	}
+
+	// CATAT LOG OTOMATIS
+	deskripsi := fmt.Sprintf("Menambahkan siswa (User ID: %d) ke dalam Kelas ID: %d", sk.SiswaUserID, sk.KelasID)
+	go catatLog(loggedInUserID, role, "ASSIGN_SISWA", deskripsi) // Pakai 'go' agar berjalan di background tanpa memblokir respon
+
+	w.Write([]byte("Siswa berhasil dimasukkan ke kelas"))
 }
 
 func UpdateSiswaKelas(w http.ResponseWriter, r *http.Request) {
-    var sk struct {
-        SiswaUserID int `json:"siswa_id"`
-        OldKelasID  int `json:"old_kelas_id"`
-        NewKelasID  int `json:"new_kelas_id"`
-    }
-    json.NewDecoder(r.Body).Decode(&sk)
+	var sk struct {
+		SiswaUserID int `json:"siswa_id"`
+		OldKelasID  int `json:"old_kelas_id"`
+		NewKelasID  int `json:"new_kelas_id"`
+	}
+	json.NewDecoder(r.Body).Decode(&sk)
 
-    // AMBIL DATA PELAKU DARI TOKEN
-    userInfo := r.Context().Value("userInfo").(jwt.MapClaims)
-    role := userInfo["role"].(string)
-    loggedInUserID := int(userInfo["user_id"].(float64))
+	// AMBIL DATA PELAKU DARI TOKEN
+	userInfo := r.Context().Value("userInfo").(jwt.MapClaims)
+	role := userInfo["role"].(string)
+	loggedInUserID := int(userInfo["user_id"].(float64))
 
-    // CEK OTORISASI KHUSUS GURU
-    if role == "guru" {
-        // Logikanya: Guru hanya boleh memutasi siswa JIKA dia adalah wali dari kelas asal (OldKelasID)
-        var waliGuruID int
-        errCheck := config.DB.QueryRow(`
+	// CEK OTORISASI KHUSUS GURU
+	if role == "guru" {
+		// Logikanya: Guru hanya boleh memutasi siswa JIKA dia adalah wali dari kelas asal (OldKelasID)
+		var waliGuruID int
+		errCheck := config.DB.QueryRow(`
             SELECT k.wali_guru_id FROM kelas k 
             JOIN guru g ON k.wali_guru_id = g.id 
             WHERE k.id = ? AND g.user_id = ?`, sk.OldKelasID, loggedInUserID).Scan(&waliGuruID)
-        
-        if errCheck != nil {
-            http.Error(w, "Akses ditolak: Anda bukan wali dari kelas asal siswa ini!", http.StatusForbidden)
-            return
-        }
-    }
 
-    // 1. TERJEMAHKAN ID SISWA
-    var realSiswaID int
-    err := config.DB.QueryRow("SELECT id FROM siswa WHERE user_id = ?", sk.SiswaUserID).Scan(&realSiswaID)
-    if err != nil {
-        http.Error(w, "Gagal: Profil siswa tidak ditemukan.", http.StatusNotFound)
-        return
-    }
+		if errCheck != nil {
+			http.Error(w, "Akses ditolak: Anda bukan wali dari kelas asal siswa ini!", http.StatusForbidden)
+			return
+		}
+	}
 
-    // 2. EKSEKUSI UPDATE
-    _, err = config.DB.Exec("UPDATE siswa_kelas SET kelas_id = ? WHERE siswa_id = ? AND kelas_id = ?", sk.NewKelasID, realSiswaID, sk.OldKelasID)
-    if err != nil {
-        http.Error(w, "Gagal update kelas siswa: "+err.Error(), 500)
-        return
-    }
+	// 1. TERJEMAHKAN ID SISWA
+	var realSiswaID int
+	err := config.DB.QueryRow("SELECT id FROM siswa WHERE user_id = ?", sk.SiswaUserID).Scan(&realSiswaID)
+	if err != nil {
+		http.Error(w, "Gagal: Profil siswa tidak ditemukan.", http.StatusNotFound)
+		return
+	}
 
-    // 3. CATAT LOG MUTASI
-    deskripsi := fmt.Sprintf("Mutasi siswa (User ID: %d) dari Kelas ID: %d menuju Kelas ID: %d", sk.SiswaUserID, sk.OldKelasID, sk.NewKelasID)
-    go catatLog(loggedInUserID, role, "UPDATE_SISWA_KELAS", deskripsi)
+	// 2. EKSEKUSI UPDATE
+	_, err = config.DB.Exec("UPDATE siswa_kelas SET kelas_id = ? WHERE siswa_id = ? AND kelas_id = ?", sk.NewKelasID, realSiswaID, sk.OldKelasID)
+	if err != nil {
+		if strings.Contains(err.Error(), "Duplicate entry") || strings.Contains(err.Error(), "1062") {
+			http.Error(w, "Siswa sudah terdaftar di kelas tujuan. Pilih kelas lain atau cek kembali data kelas siswa tersebut.", http.StatusConflict)
+			return
+		}
 
-    w.Write([]byte("Data kelas siswa berhasil diperbarui (Mutasi Berhasil)"))
+		http.Error(w, "Gagal memperbarui kelas siswa. Silakan coba lagi.", http.StatusInternalServerError)
+		return
+	}
+
+	// 3. CATAT LOG MUTASI
+	deskripsi := fmt.Sprintf("Mutasi siswa (User ID: %d) dari Kelas ID: %d menuju Kelas ID: %d", sk.SiswaUserID, sk.OldKelasID, sk.NewKelasID)
+	go catatLog(loggedInUserID, role, "UPDATE_SISWA_KELAS", deskripsi)
+
+	w.Write([]byte("Data kelas siswa berhasil diperbarui (Mutasi Berhasil)"))
 }
 
 func RemoveSiswaFromKelas(w http.ResponseWriter, r *http.Request) {
-    userSiswaID := r.URL.Query().Get("siswa_id")
-    kelasID := r.URL.Query().Get("kelas_id")
-    deleteLogs := r.URL.Query().Get("delete_logs") // Menangkap parameter "true" atau "false"
-    
-    kelasIDInt, _ := strconv.Atoi(kelasID)
+	userSiswaID := r.URL.Query().Get("siswa_id")
+	kelasID := r.URL.Query().Get("kelas_id")
+	deleteLogs := r.URL.Query().Get("delete_logs") // Menangkap parameter "true" atau "false"
 
-    // AMBIL DATA USER YANG SEDANG LOGIN
-    userInfo := r.Context().Value("userInfo").(jwt.MapClaims)
-    role := userInfo["role"].(string)
-    loggedInUserID := int(userInfo["user_id"].(float64))
+	kelasIDInt, _ := strconv.Atoi(kelasID)
 
-    // CEK OTORISASI GURU
-    if role == "guru" {
-        var waliGuruID int
-        errCheck := config.DB.QueryRow(`
+	// AMBIL DATA USER YANG SEDANG LOGIN
+	userInfo := r.Context().Value("userInfo").(jwt.MapClaims)
+	role := userInfo["role"].(string)
+	loggedInUserID := int(userInfo["user_id"].(float64))
+
+	// CEK OTORISASI GURU
+	if role == "guru" {
+		var waliGuruID int
+		errCheck := config.DB.QueryRow(`
             SELECT k.wali_guru_id FROM kelas k 
             JOIN guru g ON k.wali_guru_id = g.id 
             WHERE k.id = ? AND g.user_id = ?`, kelasIDInt, loggedInUserID).Scan(&waliGuruID)
-        
-        if errCheck != nil {
-            http.Error(w, "Akses ditolak: Anda bukan wali dari kelas ini!", http.StatusForbidden)
-            return
-        }
-    }
 
-    // TERJEMAHKAN ID
-    var realSiswaID int
-    err := config.DB.QueryRow("SELECT id FROM siswa WHERE user_id = ?", userSiswaID).Scan(&realSiswaID)
-    if err != nil {
-        http.Error(w, "Gagal: Profil siswa tidak ditemukan.", http.StatusNotFound)
-        return
-    }
+		if errCheck != nil {
+			http.Error(w, "Akses ditolak: Anda bukan wali dari kelas ini!", http.StatusForbidden)
+			return
+		}
+	}
 
-    // MULAI TRANSAKSI
-    tx, err := config.DB.Begin()
-    if err != nil {
-        http.Error(w, "Gagal memulai pemrosesan data", http.StatusInternalServerError)
-        return
-    }
-    defer tx.Rollback() // Akan dibatalkan jika ada error sebelum tx.Commit()
+	// TERJEMAHKAN ID
+	var realSiswaID int
+	err := config.DB.QueryRow("SELECT id FROM siswa WHERE user_id = ?", userSiswaID).Scan(&realSiswaID)
+	if err != nil {
+		http.Error(w, "Gagal: Profil siswa tidak ditemukan.", http.StatusNotFound)
+		return
+	}
 
-    // JIKA GURU MEMILIH MENGHAPUS LOG ABSENSI
-    if deleteLogs == "true" {
-        queryDeleteLogs := `
+	// MULAI TRANSAKSI
+	tx, err := config.DB.Begin()
+	if err != nil {
+		http.Error(w, "Gagal memulai pemrosesan data", http.StatusInternalServerError)
+		return
+	}
+	defer tx.Rollback() // Akan dibatalkan jika ada error sebelum tx.Commit()
+
+	// JIKA GURU MEMILIH MENGHAPUS LOG ABSENSI
+	if deleteLogs == "true" {
+		queryDeleteLogs := `
             DELETE l FROM log_kehadiran l
             JOIN sesi_pembelajaran sp ON l.sesi_id = sp.id
             WHERE l.siswa_id = ? AND sp.kelas_id = ?
         `
-        _, err = tx.Exec(queryDeleteLogs, realSiswaID, kelasID)
-        if err != nil {
-            http.Error(w, "Gagal menghapus riwayat absen: "+err.Error(), 500)
-            return
-        }
-    }
+		_, err = tx.Exec(queryDeleteLogs, realSiswaID, kelasID)
+		if err != nil {
+			http.Error(w, "Gagal menghapus riwayat absen: "+err.Error(), 500)
+			return
+		}
+	}
 
-    // HAPUS DARI KELAS
-    _, err = tx.Exec("DELETE FROM siswa_kelas WHERE siswa_id = ? AND kelas_id = ?", realSiswaID, kelasID)
-    if err != nil {
-        http.Error(w, "Gagal mengeluarkan siswa dari kelas: "+err.Error(), 500)
-        return
-    }
+	// HAPUS DARI KELAS
+	_, err = tx.Exec("DELETE FROM siswa_kelas WHERE siswa_id = ? AND kelas_id = ?", realSiswaID, kelasID)
+	if err != nil {
+		http.Error(w, "Gagal mengeluarkan siswa dari kelas: "+err.Error(), 500)
+		return
+	}
 
-    tx.Commit()
+	tx.Commit()
 
-    // CATAT LOG OTOMATIS
-    deskripsi := fmt.Sprintf("Mengeluarkan siswa (User ID: %s) dari Kelas ID: %s. Hapus Log: %s", userSiswaID, kelasID, deleteLogs)
-    go catatLog(loggedInUserID, role, "REMOVE_SISWA", deskripsi)
+	// CATAT LOG OTOMATIS
+	deskripsi := fmt.Sprintf("Mengeluarkan siswa (User ID: %s) dari Kelas ID: %s. Hapus Log: %s", userSiswaID, kelasID, deleteLogs)
+	go catatLog(loggedInUserID, role, "REMOVE_SISWA", deskripsi)
 
-    w.Write([]byte("Siswa berhasil dikeluarkan dari kelas tersebut"))
+	w.Write([]byte("Siswa berhasil dikeluarkan dari kelas tersebut"))
 }
 
 // ==========================================
@@ -629,33 +641,33 @@ func CreateKelas(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetAllKelas(w http.ResponseWriter, r *http.Request) {
-    // 1. Gunakan LEFT JOIN ke tabel guru untuk menarik g.user_id
-    query := `
+	// 1. Gunakan LEFT JOIN ke tabel guru untuk menarik g.user_id
+	query := `
         SELECT k.id, k.periode_id, g.user_id, k.nama_kelas 
         FROM kelas k
         LEFT JOIN guru g ON k.wali_guru_id = g.id
     `
-    rows, err := config.DB.Query(query)
-    if err != nil {
-        http.Error(w, "Gagal mengambil data: "+err.Error(), http.StatusInternalServerError)
-        return
-    }
-    defer rows.Close()
+	rows, err := config.DB.Query(query)
+	if err != nil {
+		http.Error(w, "Gagal mengambil data: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
 
-    var listKelas []models.Kelas
-    for rows.Next() {
-        var k models.Kelas
-        // 2. Scan HARUS 4 variabel sesuai dengan urutan SELECT di atas!
-        // k.WaliGuruID sekarang akan berisi g.user_id, sehingga cocok dengan Frontend Svelte
-        if err := rows.Scan(&k.ID, &k.PeriodeID, &k.WaliGuruID, &k.NamaKelas); err != nil {
-            fmt.Println("Error scan kelas:", err) // Tambahkan ini agar kalau error kelihatan di terminal VPS/Lokal
-            continue
-        }
-        listKelas = append(listKelas, k)
-    }
+	var listKelas []models.Kelas
+	for rows.Next() {
+		var k models.Kelas
+		// 2. Scan HARUS 4 variabel sesuai dengan urutan SELECT di atas!
+		// k.WaliGuruID sekarang akan berisi g.user_id, sehingga cocok dengan Frontend Svelte
+		if err := rows.Scan(&k.ID, &k.PeriodeID, &k.WaliGuruID, &k.NamaKelas); err != nil {
+			fmt.Println("Error scan kelas:", err) // Tambahkan ini agar kalau error kelihatan di terminal VPS/Lokal
+			continue
+		}
+		listKelas = append(listKelas, k)
+	}
 
-    w.Header().Set("Content-Type", "application/json")
-    json.NewEncoder(w).Encode(listKelas)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(listKelas)
 }
 
 func UpdateKelas(w http.ResponseWriter, r *http.Request) {
@@ -699,12 +711,12 @@ func DeleteKelas(w http.ResponseWriter, r *http.Request) {
 // GetDashboardStats: API untuk Dashboard Admin (Sesuai Desain UI)
 func GetDashboardStats(w http.ResponseWriter, r *http.Request) {
 	var stats struct {
-		TotalUsers              int `json:"total_users"`
-		ActiveUsers             int `json:"active_users"`
-		InactiveUsers           int `json:"inactive_users"`
-		PendingDevices          int `json:"pending_devices"`
+		TotalUsers                int `json:"total_users"`
+		ActiveUsers               int `json:"active_users"`
+		InactiveUsers             int `json:"inactive_users"`
+		PendingDevices            int `json:"pending_devices"`
 		PendingSiswaRegistrations int `json:"pending_siswa_registrations"`
-		RecentLogins   []struct {
+		RecentLogins              []struct {
 			Time   string `json:"time"`
 			User   string `json:"user"`
 			Role   string `json:"role"`
@@ -813,15 +825,15 @@ func GetInactiveUsers(w http.ResponseWriter, r *http.Request) {
 func GetAllUsers(w http.ResponseWriter, r *http.Request) {
 	// Kita buat struct khusus untuk endpoint ini agar sesuai tarikan Svelte
 	type UserResponse struct {
-        ID          int    `json:"id"`
-        NamaLengkap string `json:"nama_lengkap"`
-        Username    string `json:"username"`
-        Role        string `json:"role"`
-        Identifier  string `json:"identifier"` // <-- Menampung Nama Sekolah atau NIP
-        Email       string `json:"email"`      
-        LastLogin   string `json:"last_login"`
-        IsActive    int    `json:"is_active"`  
-    }
+		ID          int    `json:"id"`
+		NamaLengkap string `json:"nama_lengkap"`
+		Username    string `json:"username"`
+		Role        string `json:"role"`
+		Identifier  string `json:"identifier"` // <-- Menampung Nama Sekolah atau NIP
+		Email       string `json:"email"`
+		LastLogin   string `json:"last_login"`
+		IsActive    int    `json:"is_active"`
+	}
 
 	// PERBAIKAN QUERY:
 	// Tambahkan COALESCE(g.email, '') agar tidak error saat meload data siswa yang tidak punya email
@@ -863,6 +875,5 @@ func GetAllUsers(w http.ResponseWriter, r *http.Request) {
 }
 
 func catatLog(userID int, role, action, deskripsi string) {
-    config.DB.Exec("INSERT INTO activity_logs (user_id, role, action, deskripsi) VALUES (?, ?, ?, ?)", userID, role, action, deskripsi)
+	config.DB.Exec("INSERT INTO activity_logs (user_id, role, action, deskripsi) VALUES (?, ?, ?, ?)", userID, role, action, deskripsi)
 }
-
